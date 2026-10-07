@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taller Web</title>
+<style>
+/* Editor de tres columnas: biblioteca de bloques | lienzo con la página real | propiedades. Tono "mesa de dibujo": neutros fríos, un azul de tinta como acento. */
+:root{
+  --e-bg:#eef0f3; --e-panel:#ffffff; --e-fg:#161a22; --e-mut:#5b6372; --e-line:#dde1e8;
+  --e-acc:#2a55c9; --e-acc-soft:#e6ecfb; --e-stage:#e3e6ec; --e-danger:#b42318;
+  --e-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --e-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --e-bg:#14171d; --e-panel:#1b1f27; --e-fg:#e7eaf0; --e-mut:#9aa3b2; --e-line:#2c323d;
+  --e-acc:#7c9cf5; --e-acc-soft:#232c45; --e-stage:#0f1216; --e-danger:#f97066; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --e-bg:#14171d; --e-panel:#1b1f27; --e-fg:#e7eaf0; --e-mut:#9aa3b2; --e-line:#2c323d;
+  --e-acc:#7c9cf5; --e-acc-soft:#232c45; --e-stage:#0f1216; --e-danger:#f97066; color-scheme:dark}
+
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--e-bg);color:var(--e-fg);font-family:var(--e-ui);font-size:14px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:10px 16px;background:var(--e-panel);border-bottom:1px solid var(--e-line)}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;margin-right:6px;letter-spacing:-.01em}
+.mark{width:18px;height:18px;border:2px solid var(--e-acc);border-radius:3px;background:linear-gradient(var(--e-acc),var(--e-acc)) 0 0/100% 5px no-repeat}
+.grp{display:flex;align-items:center;gap:6px}
+.lbl,.cap{font-family:var(--e-mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--e-mut);font-weight:600;margin:0}
+.top select,.props select,.props input,.props textarea,.modal select,.modal textarea{font:inherit;color:var(--e-fg);background:var(--e-panel);border:1px solid var(--e-line);border-radius:6px;padding:6px 8px}
+.top select{max-width:170px}
+.b{font:inherit;font-weight:500;color:var(--e-fg);background:var(--e-panel);border:1px solid var(--e-line);border-radius:6px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+.b:hover{border-color:var(--e-acc)}
+.b:disabled{opacity:.4;cursor:default}
+.b.pri{background:var(--e-acc);border-color:var(--e-acc);color:var(--e-panel);font-weight:600}
+.b.warn{color:var(--e-danger)}
+.b.warn.arm{background:var(--e-danger);border-color:var(--e-danger);color:var(--e-panel)}
+.b.small{padding:4px 9px;font-size:13px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,label.b:focus-within{outline:2px solid var(--e-acc);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--e-line);border-radius:7px;overflow:hidden}
+.seg button{font:inherit;border:0;background:transparent;color:var(--e-mut);padding:6px 10px;cursor:pointer}
+.seg button.on{background:var(--e-acc-soft);color:var(--e-acc);font-weight:600}
+.st{font-family:var(--e-mono);font-size:12px;color:var(--e-mut);margin-left:auto}
+.st.err{color:var(--e-danger)}
+
+.main{display:grid;grid-template-columns:250px minmax(0,1fr) 330px;min-height:0}
+.lib,.props{background:var(--e-panel);overflow:auto;min-height:0}
+.lib{border-right:1px solid var(--e-line);padding:16px;display:flex;flex-direction:column;gap:22px}
+.props{border-left:1px solid var(--e-line)}
+.stage{overflow:auto;background:var(--e-stage);padding:24px;min-width:0}
+.frame{margin:0 auto;max-width:var(--dev,100%);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),0 12px 40px -12px rgba(0,0,0,.25);border-radius:6px;overflow:hidden;transition:max-width .25s ease}
+.sec{display:flex;flex-direction:column;gap:10px}
+.blist{display:grid;gap:6px}
+.bitem{font:inherit;text-align:left;color:var(--e-fg);background:transparent;border:1px solid var(--e-line);border-radius:7px;padding:8px 10px;cursor:pointer;display:grid;gap:1px}
+.bitem:hover{border-color:var(--e-acc);background:var(--e-acc-soft)}
+.bitem b{font-weight:600}
+.bitem span{color:var(--e-mut);font-size:12px}
+.outline{list-style:none;margin:0;padding:0;display:grid;gap:2px;counter-reset:o}
+.outline button{font:inherit;width:100%;text-align:left;background:transparent;border:0;border-radius:6px;padding:6px 8px;color:var(--e-fg);cursor:pointer;display:grid;grid-template-columns:22px 1fr;column-gap:4px}
+.outline button::before{counter-increment:o;content:counter(o);font-family:var(--e-mono);font-size:11px;color:var(--e-mut);grid-row:span 2;padding-top:2px}
+.outline button small{color:var(--e-mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.outline button:hover{background:var(--e-bg)}
+.outline button.on{background:var(--e-acc-soft);color:var(--e-acc)}
+.hint{color:var(--e-mut);font-size:12.5px;line-height:1.5;margin:0}
+
+.tabs{display:flex;border-bottom:1px solid var(--e-line);position:sticky;top:0;background:var(--e-panel);z-index:2}
+.tabs button{flex:1;font:inherit;background:transparent;border:0;border-bottom:2px solid transparent;padding:11px 6px;color:var(--e-mut);cursor:pointer;font-weight:500}
+.tabs button.on{color:var(--e-fg);border-bottom-color:var(--e-acc);font-weight:600}
+.pbody{padding:16px;display:flex;flex-direction:column;gap:14px}
+.phead h2{margin:2px 0 0;font-size:18px;letter-spacing:-.01em}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld>span{font-size:12.5px;font-weight:600;color:var(--e-mut)}
+.fld textarea{resize:vertical;min-height:70px;line-height:1.45}
+.fld input[type=color]{padding:2px;height:34px;width:52px}
+.colrow{display:flex;align-items:center;gap:10px;font-family:var(--e-mono);font-size:12px;color:var(--e-mut)}
+.rangerow{display:flex;align-items:center;gap:10px}
+.rangerow input{flex:1}
+.rangerow output{font-family:var(--e-mono);font-size:12px;min-width:36px;text-align:right}
+.item{border:1px solid var(--e-line);border-radius:8px;padding:10px 12px 12px;margin:0;display:flex;flex-direction:column;gap:10px;min-width:0}
+.item legend{font-size:12px;font-weight:600;color:var(--e-mut);padding:0 4px;display:flex;gap:10px;align-items:center}
+.lnk{font:inherit;font-size:12px;background:none;border:0;color:var(--e-danger);cursor:pointer;padding:0;text-decoration:underline}
+.imgrow{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start}
+.imgrow img{width:72px;height:54px;object-fit:cover;border-radius:5px;border:1px solid var(--e-line)}
+.imgctl{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.imgctl input[type=url]{width:100%}
+.acts{display:flex;flex-wrap:wrap;gap:6px;padding-top:6px;border-top:1px solid var(--e-line)}
+.empty{border:1px dashed var(--e-line);border-radius:10px;padding:18px;color:var(--e-mut);line-height:1.55}
+.pals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pal{font:inherit;font-size:12px;border:1px solid var(--e-line);border-radius:7px;background:transparent;color:var(--e-fg);padding:6px;cursor:pointer;display:grid;gap:5px;justify-items:start}
+.pal:hover{border-color:var(--e-acc)}
+.pal i{display:flex;width:100%;height:16px;border-radius:4px;overflow:hidden}
+.pal i b{flex:1}
+.pgrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:6px;border:1px solid var(--e-line);border-radius:8px;padding:10px}
+.pgrow.on{border-color:var(--e-acc);background:var(--e-acc-soft)}
+.pgrow .acts{grid-column:1/-1;border:0;padding:0}
+.pgrow input{min-width:0}
+
+/* Ayudas de edición sobre la página real */
+.pw .blk{position:relative}
+.pw .blk:hover{outline:2px dashed color-mix(in srgb,var(--e-acc) 60%,transparent);outline-offset:-2px}
+.pw .blk.sel{outline:2px solid var(--e-acc);outline-offset:-2px}
+.blk-tools{position:absolute;top:8px;right:8px;z-index:5;display:none;gap:2px;background:var(--e-acc);border-radius:6px;padding:3px;font-family:var(--e-ui);font-size:12px;line-height:1;align-items:center}
+.blk:hover .blk-tools,.blk.sel .blk-tools{display:flex}
+.blk-tools span{color:#fff;padding:0 8px 0 6px;font-weight:600}
+.blk-tools button{font:inherit;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:4px;padding:5px 7px;cursor:pointer}
+.blk-tools button:hover{background:rgba(255,255,255,.3)}
+.pw [data-edit]{cursor:text}
+.pw [data-edit]:hover{outline:1px dashed color-mix(in srgb,var(--e-acc) 75%,transparent);outline-offset:3px}
+.pw [data-edit]:focus{outline:2px solid var(--e-acc);outline-offset:3px}
+.pw [data-edit]:empty::before{content:'Escribe aquí…';opacity:.45}
+.pw .noblk{padding:80px 24px;text-align:center;font-family:var(--e-ui);color:#667}
+
+.app.preview .main{grid-template-columns:minmax(0,1fr)}
+.app.preview .lib,.app.preview .props{display:none}
+
+.modal{position:fixed;inset:0;background:rgba(10,14,22,.55);display:grid;place-items:center;padding:16px;z-index:50}
+.sheet{background:var(--e-panel);color:var(--e-fg);border-radius:12px;width:min(1000px,100%);max-height:calc(100% - 32px);overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mhead h2{margin:0;font-size:19px}
+.modal textarea{width:100%;min-height:300px;font-family:var(--e-mono);font-size:12px;line-height:1.5;box-sizing:border-box}
+.mrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.tcard{border:1px solid var(--e-line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.tthumb{height:190px;overflow:hidden;position:relative;border-bottom:1px solid var(--e-line);background:#fff}
+.tthumb>.pw{width:1200px;transform:scale(.25);transform-origin:0 0;pointer-events:none}
+.tinfo{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tinfo h3{margin:0;font-size:15px}
+.tinfo p{margin:0;color:var(--e-mut);font-size:13px;line-height:1.45;flex:1}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--e-fg);color:var(--e-panel);padding:9px 16px;border-radius:8px;font-weight:500;z-index:60;max-width:calc(100% - 32px)}
+
+@media (max-width:900px){
+  .app{height:auto;display:block}
+  .main{display:flex;flex-direction:column}
+  .stage{order:1;padding:12px}
+  .props{order:2;border:0;border-top:1px solid var(--e-line)}
+  .lib{order:3;border:0;border-top:1px solid var(--e-line)}
+  .st{margin-left:0;flex-basis:100%}
+  .seg button{padding:6px 8px}
+}
+@media (prefers-reduced-motion:reduce){.frame{transition:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true"></span>Taller Web</div>
+    <div class="grp"><label class="lbl" for="siteSel">Sitio</label><select id="siteSel"></select><button class="b" id="newSite" type="button">Nuevo sitio</button></div>
+    <div class="grp"><label class="lbl" for="pageSel">Página</label><select id="pageSel"></select></div>
+    <div class="seg" id="devSeg" role="group" aria-label="Ancho de vista">
+      <button type="button" data-dev="100%" class="on">Escritorio</button><button type="button" data-dev="820px">Tablet</button><button type="button" data-dev="390px">Móvil</button>
+    </div>
+    <div class="grp"><button class="b" id="undo" type="button" title="Deshacer (Ctrl+Z)">Deshacer</button><button class="b" id="redo" type="button" title="Rehacer (Ctrl+Y)">Rehacer</button></div>
+    <span class="st" id="saveSt"></span>
+    <button class="b" id="prevBtn" type="button">Vista previa</button>
+    <button class="b pri" id="expBtn" type="button">Exportar</button>
+  </header>
+  <div class="main">
+    <aside class="lib" id="lib"></aside>
+    <main class="stage" id="stage"><div class="frame" id="frame"><div class="pw" id="canvas"></div></div></main>
+    <aside class="props" id="props"></aside>
+  </div>
+</div>
+<div class="modal" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mhead"><h2 id="mTitle"></h2><button class="b" id="mClose" type="button">Cerrar</button></div><div id="mBody"></div></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ===================== CSS de los sitios generados (se usa en el lienzo y en la exportación) ===================== */
+const SITE_CSS = `
+.pw{--s:color-mix(in srgb,var(--tx) 5%,var(--bg));--mut:color-mix(in srgb,var(--tx) 68%,var(--bg));--line:color-mix(in srgb,var(--tx) 13%,var(--bg));
+ container-type:inline-size;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:17px;line-height:1.6;text-align:left}
+.pw *{box-sizing:border-box}
+.pw h1,.pw h2,.pw h3{font-family:var(--fh);line-height:1.15;margin:0 0 .5em;text-wrap:balance;font-weight:700;letter-spacing:-.01em}
+.pw h1{font-size:clamp(2.1rem,5.2cqi,3.6rem)}
+.pw h2{font-size:clamp(1.65rem,3.4cqi,2.5rem)}
+.pw h3{font-size:1.2rem}
+.pw p{margin:0 0 1em}
+.pw a{color:inherit}
+.pw img{max-width:100%;display:block}
+.pw .wrap{max-width:var(--w);margin:0 auto;padding-inline:24px}
+.pw section{padding-block:clamp(48px,8cqi,96px)}
+.pw .alt{background:var(--s)}
+.pw .btn{display:inline-block;background:var(--p);color:var(--onp);padding:.75em 1.35em;border-radius:var(--r);text-decoration:none;font-weight:600;border:2px solid var(--p);font-family:var(--fb);font-size:1rem;cursor:pointer}
+.pw .btn.ghost{background:transparent;color:var(--tx);border-color:var(--line)}
+.pw .btn.sm{padding:.45em 1em;font-size:.9rem}
+.pw .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:700;color:var(--p);margin-bottom:.8em}
+.pw .lead{font-size:1.15rem;color:var(--mut);max-width:60ch}
+.pw .head{max-width:680px;margin-bottom:40px}
+.pw .head.c{margin-inline:auto;text-align:center}
+.pw .head.c .lead{margin-inline:auto}
+.pw .b-header{border-bottom:1px solid var(--line);padding-block:14px;background:var(--bg)}
+.pw .row{display:flex;align-items:center;gap:12px 24px;flex-wrap:wrap}
+.pw .logo{font-family:var(--fh);font-weight:800;font-size:1.3rem;text-decoration:none;margin-right:auto}
+.pw nav{display:flex;gap:6px 20px;flex-wrap:wrap}
+.pw nav a{text-decoration:none;color:var(--mut);font-weight:500}
+.pw nav a.on{color:var(--tx);box-shadow:inset 0 -2px var(--p)}
+.pw .hero-split{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+.pw .hero-c{text-align:center}
+.pw .hero-c .lead{margin-inline:auto}
+.pw .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.pw .hero-c .btns{justify-content:center}
+.pw .media{border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;background:var(--s);max-width:100%}
+.pw .media img{width:100%;height:100%;object-fit:cover}
+.pw .hero-c .media{aspect-ratio:21/9;margin-top:48px}
+.pw .grid{display:grid;gap:24px;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
+.pw .card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:flex;flex-direction:column}
+.pw .card p{color:var(--mut);margin:0}
+.pw .ico{min-width:44px;height:44px;padding:0 10px;align-self:flex-start;border-radius:calc(var(--r)*.8);background:color-mix(in srgb,var(--p) 14%,var(--bg));color:var(--p);display:grid;place-items:center;font-weight:800;margin-bottom:18px;font-family:var(--fh)}
+.pw .split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.pw .split.rev .media{order:2}
+.pw .prose{max-width:720px}
+.pw .prose.c{margin-inline:auto;text-align:center}
+.pw .paras p{font-size:1.06rem}
+.pw .b-cta .box{background:var(--p);color:var(--onp);border-radius:calc(var(--r)*1.6);padding:clamp(32px,6cqi,64px);text-align:center}
+.pw .b-cta .box p{opacity:.88;max-width:56ch;margin-inline:auto}
+.pw .b-cta .btn{background:var(--onp);color:var(--p);border-color:var(--onp);margin-top:8px}
+.pw blockquote{margin:0 0 20px;font-family:var(--fh);font-size:1.12rem;line-height:1.5;flex:1}
+.pw .who{font-weight:700;margin:0}
+.pw .who small{display:block;font-weight:400;color:var(--mut);font-size:.9rem}
+.pw .price{font-family:var(--fh);font-size:2.2rem;font-weight:800;margin:4px 0 0;color:var(--tx)}
+.pw .price small{font-size:.9rem;color:var(--mut);font-weight:400;font-family:var(--fb)}
+.pw .card.hl{border:2px solid var(--p);box-shadow:0 14px 34px -18px color-mix(in srgb,var(--p) 70%,transparent)}
+.pw .tag{align-self:flex-start;background:var(--p);color:var(--onp);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 9px;border-radius:99px;margin-bottom:12px}
+.pw ul.ck{list-style:none;padding:0;margin:16px 0 24px;flex:1}
+.pw ul.ck li{padding:7px 0;border-top:1px solid var(--line)}
+.pw .gal figure{margin:0}
+.pw figcaption{margin-top:10px;font-weight:600}
+.pw form{display:grid;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:28px}
+.pw input,.pw textarea{font:inherit;padding:12px 14px;border:1px solid var(--line);border-radius:calc(var(--r)*.7);background:var(--bg);color:var(--tx);width:100%}
+.pw dl{display:grid;gap:14px;margin:24px 0 0}
+.pw dt{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mut)}
+.pw dd{margin:0;font-weight:600}
+.pw .b-footer{border-top:1px solid var(--line);padding-block:32px;color:var(--mut);font-size:.92rem}
+.pw .b-footer .row{justify-content:space-between}
+.pw .b-footer strong{color:var(--tx)}
+@container (max-width:760px){
+ .pw .hero-split,.pw .split{grid-template-columns:1fr;gap:32px}
+ .pw .split.rev .media{order:0}
+ .pw .grid{grid-template-columns:1fr}
+ .pw .hero-c .media{aspect-ratio:4/3}
+ .pw .wrap{padding-inline:18px}
+}`;
+
+/* ===================== Tipografías y paletas ===================== */
+const FONTS = {
+  clasica:  {n:'Clásica',  h:'Fraunces',          hw:'600;800', hf:'Georgia,serif',      b:'Source Sans 3', bw:'400;600;700', bf:'system-ui,sans-serif'},
+  moderna:  {n:'Moderna',  h:'Archivo',           hw:'600;800', hf:'system-ui,sans-serif', b:'Karla',       bw:'400;600;700', bf:'system-ui,sans-serif'},
+  elegante: {n:'Elegante', h:'Cormorant Garamond',hw:'600;700', hf:'Garamond,Georgia,serif', b:'Lato',      bw:'400;700',     bf:'system-ui,sans-serif'},
+  tecnica:  {n:'Técnica',  h:'JetBrains Mono',    hw:'600;800', hf:'Consolas,monospace', b:'IBM Plex Sans', bw:'400;600;700', bf:'system-ui,sans-serif'},
+  amigable: {n:'Amigable', h:'Nunito',            hw:'700;800', hf:'system-ui,sans-serif', b:'Nunito Sans', bw:'400;600;700', bf:'system-ui,sans-serif'}
+};
+const PALS = [
+  ['Tierra','#8a4b2a','#faf6f0','#2b1d14'],['Océano','#1d4ed8','#ffffff','#0f172a'],['Bosque','#0d8a5f','#f6f9f7','#0c1f17'],
+  ['Noche','#f5b942','#14161c','#eef0f4'],['Vino','#9b1d42','#fff8f6','#2a0f17'],['Grafito','#1f2937','#f3f4f6','#111827']
+];
+function fontURL(list){
+  const fam=[]; const seen=new Set();
+  list.forEach(([name,w])=>{ if(seen.has(name))return; seen.add(name); fam.push('family='+name.replace(/ /g,'+')+':wght@'+w); });
+  return 'https://fonts.googleapis.com/css2?'+fam.join('&')+'&display=swap';
+}
+
+/* ===================== Utilidades ===================== */
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone=o=>JSON.parse(JSON.stringify(o));
+const slugify=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function setPath(o,path,v){const ks=path.split('.');let t=o;for(let i=0;i<ks.length-1;i++)t=t[ks[i]];t[ks[ks.length-1]]=v;}
+function onColor(hex){const h=hex.replace('#','');if(h.length<6)return '#fff';const [r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4);return (0.2126*r+0.7152*g+0.0722*b)>0.45?'#14161a':'#ffffff';}
+
+let MODE='edit', CUR=null;
+const ed=k=>MODE==='edit'?` data-edit="${k}"`:'';
+const t=(tag,k,v,cls)=>(!v&&MODE!=='edit')?'':`<${tag}${cls?` class="${cls}"`:''}${ed(k)}>${esc(v)}</${tag}>`;
+const paras=(k,v)=>(!v&&MODE!=='edit')?'':`<div class="paras"${ed(k)}${MODE==='edit'?' data-multi="p"':''}>${String(v||'').split(/\n\s*\n/).filter(x=>x.trim()).map(p=>`<p>${esc(p.trim()).replace(/\n/g,'<br>')}</p>`).join('')}</div>`;
+const lines=(k,v)=>`<ul class="ck"${ed(k)}${MODE==='edit'?' data-multi="l"':''}>${String(v||'').split('\n').filter(x=>x.trim()).map(l=>`<li>${esc(l.trim())}</li>`).join('')}</ul>`;
+const btn=(k,link,v,cls)=>(!v&&MODE!=='edit')?'':`<a class="btn ${cls||''}" href="${esc(link||'#')}"${ed(k)}>${esc(v)}</a>`;
+function ph(label){
+  const th=CUR||{primary:'#888888',bg:'#ffffff',text:'#222222'};
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${th.primary}"/><stop offset="1" stop-color="${th.text}"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/><circle cx="610" cy="150" r="88" fill="${th.bg}" fill-opacity=".2"/><path d="M0 470 L220 300 L390 430 L540 320 L800 510 L800 600 L0 600Z" fill="${th.bg}" fill-opacity=".22"/><text x="40" y="560" font-family="Arial,sans-serif" font-size="26" fill="${th.bg}" fill-opacity=".85">${esc(String(label||'Imagen').slice(0,48))}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+const im=(src,label)=>`<img src="${src?esc(src):ph(label)}" alt="${esc(label||'')}">`;
+const sec=(p,cls,inner)=>`<section class="${cls}${p.bg==='alt'?' alt':''}"${p.anchor?` id="${esc(p.anchor)}"`:''}>${inner}</section>`;
+
+/* ===================== Bloques ===================== */
+const COMMON=[{k:'bg',l:'Fondo de la sección',t:'select',o:[['','Normal'],['alt','Alterno (tono suave)']]},{k:'anchor',l:'Ancla para enlaces (ej. contacto → #contacto)',t:'text'}];
+const B={
+  header:{label:'Encabezado',desc:'Logo, menú de páginas y botón',sec:false,
+    f:[{k:'logo',l:'Nombre o logo',t:'text'},{k:'cta',l:'Texto del botón',t:'text'},{k:'ctaLink',l:'Enlace del botón',t:'text'}],
+    def:()=>({logo:'Mi sitio',cta:'Contactar',ctaLink:'#contacto'}),
+    r:(p,c)=>`<header class="b-header"><div class="wrap row"><a class="logo" href="${c.home}"${ed('logo')}>${esc(p.logo)}</a><nav>${c.nav}</nav>${btn('cta',p.ctaLink,p.cta,'sm')}</div></header>`},
+  hero:{label:'Portada',desc:'Titular grande con imagen y botones',
+    f:[{k:'layout',l:'Diseño',t:'select',o:[['split','Texto e imagen lado a lado'],['center','Centrado con imagen debajo']]},{k:'eyebrow',l:'Antetítulo',t:'text'},{k:'title',l:'Título',t:'textarea'},{k:'subtitle',l:'Subtítulo',t:'textarea'},{k:'btn1',l:'Botón principal',t:'text'},{k:'btn1Link',l:'Enlace botón principal',t:'text'},{k:'btn2',l:'Botón secundario',t:'text'},{k:'btn2Link',l:'Enlace botón secundario',t:'text'},{k:'image',l:'Imagen',t:'image'}],
+    def:()=>({layout:'split',eyebrow:'Bienvenido',title:'Un titular claro que diga qué ofreces',subtitle:'Una o dos frases que expliquen a quién ayudas y por qué deberían elegirte.',btn1:'Empezar',btn1Link:'#contacto',btn2:'Saber más',btn2Link:'#',image:''}),
+    r:p=>{const media=`<div class="media">${im(p.image,p.title)}</div>`;
+      const txt=`${t('p','eyebrow',p.eyebrow,'eyebrow')}${t('h1','title',p.title)}${t('p','subtitle',p.subtitle,'lead')}<div class="btns">${btn('btn1',p.btn1Link,p.btn1)}${btn('btn2',p.btn2Link,p.btn2,'ghost')}</div>`;
+      return sec(p,'b-hero',`<div class="wrap ${p.layout==='center'?'hero-c':'hero-split'}">${p.layout==='center'?txt+media:`<div>${txt}</div>${media}`}</div>`);}},
+  features:{label:'Características',desc:'Tarjetas con icono, título y texto',
+    f:[{k:'title',l:'Título',t:'text'},{k:'subtitle',l:'Subtítulo',t:'textarea'},{k:'cols',l:'Columnas',t:'select',o:[['2','2'],['3','3'],['4','4']]},{k:'items',l:'Tarjetas',t:'list',il:'Tarjeta',sub:[{k:'icon',l:'Icono (1 a 3 caracteres)',t:'text'},{k:'title',l:'Título',t:'text'},{k:'text',l:'Texto',t:'textarea'}],d:()=>({icon:'+',title:'Nueva ventaja',text:'Describe el beneficio en una frase.'})}],
+    def:()=>({title:'Por qué elegirnos',subtitle:'',cols:'3',items:[{icon:'1',title:'Rápido',text:'Explica el primer beneficio.'},{icon:'2',title:'Confiable',text:'Explica el segundo beneficio.'},{icon:'3',title:'Cercano',text:'Explica el tercer beneficio.'}]}),
+    r:p=>sec(p,'b-features',`<div class="wrap"><div class="head c">${t('h2','title',p.title)}${t('p','subtitle',p.subtitle,'lead')}</div><div class="grid" style="--cols:${esc(p.cols)}">${p.items.map((it,i)=>`<div class="card"><div class="ico"${ed(`items.${i}.icon`)}>${esc(it.icon)}</div>${t('h3',`items.${i}.title`,it.title)}${t('p',`items.${i}.text`,it.text)}</div>`).join('')}</div></div>`)},
+  text:{label:'Texto',desc:'Título y párrafos',
+    f:[{k:'eyebrow',l:'Antetítulo',t:'text'},{k:'title',l:'Título',t:'text'},{k:'body',l:'Texto (deja una línea en blanco entre párrafos)',t:'textarea'},{k:'align',l:'Alineación',t:'select',o:[['','Izquierda'],['c','Centrado']]}],
+    def:()=>({eyebrow:'',title:'Sobre nosotros',body:'Cuenta tu historia en pocas líneas.\n\nUn segundo párrafo con más detalle.',align:''}),
+    r:p=>sec(p,'b-text',`<div class="wrap"><div class="prose ${p.align==='c'?'c':''}">${t('p','eyebrow',p.eyebrow,'eyebrow')}${t('h2','title',p.title)}${paras('body',p.body)}</div></div>`)},
+  imageText:{label:'Imagen y texto',desc:'Dos columnas: foto y explicación',
+    f:[{k:'reverse',l:'Posición de la imagen',t:'select',o:[['no','A la izquierda'],['si','A la derecha']]},{k:'eyebrow',l:'Antetítulo',t:'text'},{k:'title',l:'Título',t:'text'},{k:'body',l:'Texto',t:'textarea'},{k:'btn',l:'Botón',t:'text'},{k:'btnLink',l:'Enlace del botón',t:'text'},{k:'image',l:'Imagen',t:'image'}],
+    def:()=>({reverse:'no',eyebrow:'',title:'Cómo trabajamos',body:'Explica tu proceso o tu producto con un ejemplo concreto.',btn:'',btnLink:'#',image:''}),
+    r:p=>sec(p,'b-imagetext',`<div class="wrap split ${p.reverse==='si'?'rev':''}"><div class="media">${im(p.image,p.title)}</div><div>${t('p','eyebrow',p.eyebrow,'eyebrow')}${t('h2','title',p.title)}${paras('body',p.body)}${(p.btn||MODE==='edit')?`<div class="btns">${btn('btn',p.btnLink,p.btn)}</div>`:''}</div></div>`)},
+  testimonials:{label:'Testimonios',desc:'Opiniones de clientes',
+    f:[{k:'title',l:'Título',t:'text'},{k:'items',l:'Testimonios',t:'list',il:'Testimonio',sub:[{k:'quote',l:'Cita',t:'textarea'},{k:'name',l:'Nombre',t:'text'},{k:'role',l:'Cargo o detalle',t:'text'}],d:()=>({quote:'Lo que dijo el cliente.',name:'Nombre Apellido',role:'Empresa'})}],
+    def:()=>({title:'Lo que dicen nuestros clientes',items:[{quote:'Una opinión real y concreta de un cliente.',name:'Nombre Apellido',role:'Empresa'},{quote:'Otra opinión que mencione un resultado.',name:'Nombre Apellido',role:'Empresa'}]}),
+    r:p=>sec(p,'b-testi',`<div class="wrap"><div class="head c">${t('h2','title',p.title)}</div><div class="grid" style="--cols:${Math.min(3,p.items.length||1)}">${p.items.map((it,i)=>`<figure class="card" style="margin:0"><blockquote${ed(`items.${i}.quote`)}>${esc(it.quote)}</blockquote><figcaption class="who"><span${ed(`items.${i}.name`)}>${esc(it.name)}</span><small${ed(`items.${i}.role`)}>${esc(it.role)}</small></figcaption></figure>`).join('')}</div></div>`)},
+  pricing:{label:'Precios',desc:'Planes, tarifas o carta',
+    f:[{k:'title',l:'Título',t:'text'},{k:'subtitle',l:'Subtítulo',t:'text'},{k:'items',l:'Planes',t:'list',il:'Plan',sub:[{k:'name',l:'Nombre',t:'text'},{k:'price',l:'Precio',t:'text'},{k:'period',l:'Periodo (ej. /mes)',t:'text'},{k:'features',l:'Incluye (una línea por elemento)',t:'textarea'},{k:'highlight',l:'Destacado',t:'select',o:[['no','No'],['si','Sí, marcar como recomendado']]},{k:'btn',l:'Botón',t:'text'}],d:()=>({name:'Nuevo plan',price:'0',period:'/mes',features:'Elemento 1\nElemento 2',highlight:'no',btn:'Elegir'})}],
+    def:()=>({title:'Planes',subtitle:'',items:[{name:'Básico',price:'$9',period:'/mes',features:'Lo esencial\nSoporte por correo',highlight:'no',btn:'Elegir'},{name:'Profesional',price:'$29',period:'/mes',features:'Todo lo del Básico\nSoporte prioritario\nInformes',highlight:'si',btn:'Elegir'}]}),
+    r:p=>sec(p,'b-pricing',`<div class="wrap"><div class="head c">${t('h2','title',p.title)}${t('p','subtitle',p.subtitle,'lead')}</div><div class="grid" style="--cols:${Math.min(4,p.items.length||1)}">${p.items.map((it,i)=>`<div class="card${it.highlight==='si'?' hl':''}">${it.highlight==='si'?'<span class="tag">Recomendado</span>':''}${t('h3',`items.${i}.name`,it.name)}<p class="price"><span${ed(`items.${i}.price`)}>${esc(it.price)}</span> <small${ed(`items.${i}.period`)}>${esc(it.period)}</small></p>${lines(`items.${i}.features`,it.features)}${btn(`items.${i}.btn`,'#contacto',it.btn,it.highlight==='si'?'':'ghost')}</div>`).join('')}</div></div>`)},
+  gallery:{label:'Galería',desc:'Cuadrícula de imágenes con pie',
+    f:[{k:'title',l:'Título',t:'text'},{k:'subtitle',l:'Subtítulo',t:'text'},{k:'cols',l:'Columnas',t:'select',o:[['2','2'],['3','3'],['4','4']]},{k:'items',l:'Imágenes',t:'list',il:'Imagen',sub:[{k:'image',l:'Imagen',t:'image'},{k:'caption',l:'Pie de foto',t:'text'}],d:()=>({image:'',caption:'Nueva imagen'})}],
+    def:()=>({title:'Galería',subtitle:'',cols:'3',items:[{image:'',caption:'Primera imagen'},{image:'',caption:'Segunda imagen'},{image:'',caption:'Tercera imagen'}]}),
+    r:p=>sec(p,'b-gallery',`<div class="wrap"><div class="head">${t('h2','title',p.title)}${t('p','subtitle',p.subtitle,'lead')}</div><div class="grid gal" style="--cols:${esc(p.cols)}">${p.items.map((it,i)=>`<figure><div class="media">${im(it.image,it.caption)}</div><figcaption${ed(`items.${i}.caption`)}>${esc(it.caption)}</figcaption></figure>`).join('')}</div></div>`)},
+  cta:{label:'Llamada a la acción',desc:'Franja de color con un botón',
+    f:[{k:'title',l:'Título',t:'text'},{k:'text',l:'Texto',t:'textarea'},{k:'btn',l:'Botón',t:'text'},{k:'btnLink',l:'Enlace del botón',t:'text'}],
+    def:()=>({title:'¿Listo para empezar?',text:'Escríbenos hoy y te respondemos en menos de 24 horas.',btn:'Contactar',btnLink:'#contacto'}),
+    r:p=>sec(p,'b-cta',`<div class="wrap"><div class="box">${t('h2','title',p.title)}${t('p','text',p.text)}${btn('btn',p.btnLink,p.btn)}</div></div>`)},
+  contact:{label:'Contacto',desc:'Datos de contacto y formulario',
+    f:[{k:'title',l:'Título',t:'text'},{k:'text',l:'Texto',t:'textarea'},{k:'email',l:'Correo',t:'text'},{k:'phone',l:'Teléfono',t:'text'},{k:'address',l:'Dirección',t:'text'},{k:'hours',l:'Horario',t:'text'},{k:'button',l:'Texto del botón del formulario',t:'text'}],
+    def:()=>({anchor:'contacto',title:'Hablemos',text:'Déjanos tu mensaje y te respondemos pronto.',email:'hola@tusitio.com',phone:'+00 000 000 000',address:'Tu ciudad',hours:'Lunes a viernes, 9:00 a 18:00',button:'Enviar mensaje'}),
+    r:p=>{const dl=[['email','Correo'],['phone','Teléfono'],['address','Dirección'],['hours','Horario']].filter(([k])=>p[k]||MODE==='edit').map(([k,l])=>`<div><dt>${l}</dt><dd${ed(k)}>${esc(p[k])}</dd></div>`).join('');
+      const onsub=MODE==='export'?` onsubmit="event.preventDefault();this.innerHTML='<p><strong>¡Gracias!</strong> Recibimos tu mensaje.</p>'"`:'';
+      return sec(p,'b-contact',`<div class="wrap split"><div>${t('h2','title',p.title)}${t('p','text',p.text,'lead')}<dl>${dl}</dl></div><form${onsub}><input name="nombre" placeholder="Tu nombre" aria-label="Tu nombre"><input name="correo" type="email" placeholder="Tu correo" aria-label="Tu correo"><textarea name="mensaje" rows="5" placeholder="¿En qué te ayudamos?" aria-label="Mensaje"></textarea><button class="btn" type="submit"><span${ed('button')}>${esc(p.button)}</span></button></form></div>`);}},
+  footer:{label:'Pie de página',desc:'Nombre, dirección y aviso',sec:false,
+    f:[{k:'text',l:'Texto principal',t:'text'},{k:'small',l:'Texto secundario',t:'text'}],
+    def:()=>({text:'Mi sitio',small:'© 2026 · Todos los derechos reservados'}),
+    r:p=>`<footer class="b-footer"><div class="wrap row">${t('strong','text',p.text)}${t('span','small',p.small)}</div></footer>`}
+};
+
+/* ===================== Plantillas base ===================== */
+const TPL={
+  cafe:{name:'Cafetería El Molino',desc:'Negocio local con carta, galería y página de contacto. Tres páginas.',
+    theme:{primary:'#8a4b2a',bg:'#faf6f0',text:'#2b1d14',font:'elegante',radius:6,width:1120},
+    pages:[
+      {title:'Inicio',slug:'index',blocks:[
+        ['header',{logo:'El Molino',cta:'Reservar mesa',ctaLink:'contacto.html'}],
+        ['hero',{eyebrow:'Café de especialidad · Desde 2009',title:'Café tostado cada mañana en el barrio',subtitle:'Granos de origen único de Huila y Cajamarca, panadería de masa madre y un rincón tranquilo para trabajar o conversar.',btn1:'Ver la carta',btn1Link:'menu.html',btn2:'Cómo llegar',btn2Link:'contacto.html'}],
+        ['features',{title:'Por qué volver',subtitle:'Tres cosas que cuidamos cada día.',items:[{icon:'5 kg',title:'Tostado propio',text:'Tostamos en lotes pequeños los martes y viernes para que cada taza llegue en su punto.'},{icon:'24 h',title:'Pan de masa madre',text:'Fermentación lenta, harina de molino de piedra y salida del horno a las 7:30.'},{icon:'Wifi',title:'Mesas para trabajar',text:'Mesas grandes junto a la ventana, enchufes en cada una y recarga de café filtrado a mitad de precio.'}]}],
+        ['imageText',{bg:'alt',eyebrow:'Nuestro tueste',title:'Del saco verde a tu taza en menos de una semana',body:'Compramos directo a dos cooperativas y tostamos en el local, a la vista de todos. Si te interesa, te enseñamos el perfil de tueste del día.\n\nTambién vendemos el grano en bolsas de 250 g y 1 kg, molido a tu gusto.',btn:'Ver precios del grano',btnLink:'menu.html'}],
+        ['testimonials',{title:'Lo que dicen los vecinos',items:[{quote:'El mejor flat white de la zona y el croissant sigue crujiente a media tarde.',name:'Lucía Fernández',role:'Clienta desde 2015'},{quote:'Trabajo aquí dos mañanas por semana. Buen café, buena música y nadie te mira mal por quedarte.',name:'Martín Ochoa',role:'Diseñador independiente'},{quote:'Encargamos la bandeja de bollería para la oficina cada viernes y siempre llega puntual.',name:'Carla Méndez',role:'Estudio Arquitectura Norte'}]}],
+        ['cta',{title:'Celebra tu reunión en El Molino',text:'Reservamos la sala del fondo para grupos de hasta 14 personas, con café ilimitado y bandeja de bollería.',btn:'Pedir presupuesto',btnLink:'contacto.html'}],
+        ['footer',{text:'El Molino · Café y panadería',small:'Calle Mayor 18 · Abierto todos los días de 7:30 a 20:00'}]]},
+      {title:'Carta',slug:'menu',blocks:[
+        ['header',{logo:'El Molino',cta:'Reservar mesa',ctaLink:'contacto.html'}],
+        ['text',{eyebrow:'Carta de otoño',title:'Para desayunar, merendar y llevar',body:'Precios con impuestos incluidos. La leche vegetal no tiene coste extra.',align:'c'}],
+        ['pricing',{title:'Desayunos',subtitle:'Servimos desayunos hasta las 12:00',items:[{name:'Desayuno Molino',price:'6,50 €',period:'',features:'Café o té a elegir\nTostada de masa madre con tomate y aceite\nZumo de naranja natural',highlight:'si',btn:'Reservar mesa'},{name:'Bollería del día',price:'2,20 €',period:'unidad',features:'Croissant de mantequilla\nNapolitana de chocolate\nRollo de canela',highlight:'no',btn:''},{name:'Café de filtro',price:'2,80 €',period:'taza',features:'V60 o Chemex\nOrigen del día\nRecarga a mitad de precio',highlight:'no',btn:''}]}],
+        ['gallery',{bg:'alt',title:'Del mostrador',items:[{image:'',caption:'Croissant de mantequilla'},{image:'',caption:'Flat white con leche de avena'},{image:'',caption:'Hogaza de centeno'}]}],
+        ['footer',{text:'El Molino · Café y panadería',small:'Calle Mayor 18 · Abierto todos los días de 7:30 a 20:00'}]]},
+      {title:'Contacto',slug:'contacto',blocks:[
+        ['header',{logo:'El Molino',cta:'Reservar mesa',ctaLink:'contacto.html'}],
+        ['contact',{title:'Ven a vernos',text:'Para reservas de grupo o encargos de bollería, escríbenos y te respondemos el mismo día.',email:'hola@elmolinocafe.es',phone:'+34 912 345 678',address:'Calle Mayor 18, Madrid',hours:'Lunes a domingo, de 7:30 a 20:00',button:'Enviar mensaje'}],
+        ['footer',{text:'El Molino · Café y panadería',small:'Calle Mayor 18 · Abierto todos los días de 7:30 a 20:00'}]]}
+    ]},
+  portafolio:{name:'Portafolio Ana Ruiz',desc:'Portafolio de desarrolladora .NET con proyectos, experiencia y contacto. Una página.',
+    theme:{primary:'#1d4ed8',bg:'#ffffff',text:'#0f172a',font:'tecnica',radius:4,width:1080},
+    pages:[{title:'Inicio',slug:'index',blocks:[
+      ['header',{logo:'ana.ruiz',cta:'Hablemos',ctaLink:'#contacto'}],
+      ['hero',{layout:'center',eyebrow:'Desarrolladora .NET · Lima',title:'Construyo sistemas de gestión que la gente sí quiere usar',subtitle:'Ocho años creando aplicaciones de escritorio y web con C#, VB.NET y SQL Server para empresas de logística, retail y salud.',btn1:'Ver proyectos',btn1Link:'#proyectos',btn2:'Descargar CV',btn2Link:'#'}],
+      ['features',{bg:'alt',title:'Con qué trabajo',subtitle:'',items:[{icon:'C#',title:'Backend .NET',text:'ASP.NET Core, Web API, Entity Framework y Dapper en arquitectura N-capas.'},{icon:'SQL',title:'SQL Server',text:'Modelado, procedimientos almacenados, índices y planes de ejecución para tablas de millones de filas.'},{icon:'UI',title:'Interfaces',text:'Windows Forms y WPF para la operación interna, Blazor y Razor para la web.'}]}],
+      ['gallery',{anchor:'proyectos',title:'Proyectos recientes',subtitle:'Una selección de los últimos tres años.',items:[{image:'',caption:'ERP de almacenes · 40 usuarios concurrentes'},{image:'',caption:'Portal de citas médicas · 12 clínicas'},{image:'',caption:'Migración de VB6 a .NET 8 · 180 formularios'}]}],
+      ['testimonials',{bg:'alt',title:'Con quién he trabajado',items:[{quote:'Ana migró nuestro sistema de facturación sin un solo día de parada. El equipo ni notó el cambio.',name:'Jorge Paredes',role:'Jefe de TI, Distribuidora Andina'},{quote:'Redujo el cierre de mes de seis horas a veinte minutos reescribiendo tres procedimientos.',name:'Patricia Salas',role:'Gerente de Finanzas, Grupo Retail Sur'}]}],
+      ['contact',{anchor:'contacto',title:'¿Tienes un proyecto?',text:'Cuéntame qué necesitas y te respondo en 24 horas con una propuesta.',email:'ana@anaruiz.dev',phone:'+51 987 654 321',address:'Lima, Perú · Trabajo en remoto',hours:'Disponible desde noviembre',button:'Enviar'}],
+      ['footer',{text:'Ana Ruiz',small:'Hecho con Taller Web · 2026'}]]}]},
+  producto:{name:'FacturaFácil',desc:'Landing de producto SaaS con planes de precio y contacto comercial. Dos páginas.',
+    theme:{primary:'#0d8a5f',bg:'#f6f9f7',text:'#0c1f17',font:'moderna',radius:12,width:1160},
+    pages:[
+      {title:'Inicio',slug:'index',blocks:[
+        ['header',{logo:'FacturaFácil',cta:'Probar gratis',ctaLink:'#precios'}],
+        ['hero',{eyebrow:'Facturación electrónica',title:'Emite facturas válidas en 30 segundos desde cualquier dispositivo',subtitle:'Conectada con la autoridad tributaria, con inventario y reportes de ventas. Sin instalar nada.',btn1:'Crear cuenta gratis',btn1Link:'#precios',btn2:'Ver demostración',btn2Link:'contacto.html'}],
+        ['features',{title:'Todo lo que tu contador te va a pedir',subtitle:'',items:[{icon:'XML',title:'Comprobantes válidos',text:'Facturas, boletas y notas de crédito firmadas y enviadas automáticamente.'},{icon:'Stock',title:'Inventario en tiempo real',text:'Cada venta descuenta stock y te avisa antes de quedarte sin producto.'},{icon:'PDF',title:'Reportes para el cierre',text:'Registro de ventas y libro electrónico listos para descargar cada mes.'}]}],
+        ['imageText',{reverse:'si',bg:'alt',eyebrow:'Desde el móvil',title:'Factura en el mostrador o en la calle',body:'La aplicación funciona en el navegador del teléfono. Escaneas el código del producto, eliges el cliente y envías el comprobante por WhatsApp o correo.',btn:'Ver cómo funciona',btnLink:'contacto.html'}],
+        ['pricing',{anchor:'precios',title:'Planes sin permanencia',subtitle:'Cambia de plan o cancela cuando quieras.',items:[{name:'Emprendedor',price:'$0',period:'/mes',features:'Hasta 30 comprobantes al mes\n1 usuario\nSoporte por correo',highlight:'no',btn:'Empezar gratis'},{name:'Pyme',price:'$19',period:'/mes',features:'Comprobantes ilimitados\n5 usuarios\nInventario y reportes\nSoporte por chat',highlight:'si',btn:'Probar 14 días'},{name:'Empresa',price:'$49',period:'/mes',features:'Varias sucursales\nUsuarios ilimitados\nAPI para tu ERP\nGestor de cuenta',highlight:'no',btn:'Hablar con ventas'}]}],
+        ['testimonials',{title:'Más de 3.000 negocios ya facturan con nosotros',items:[{quote:'Pasamos de facturar a mano en Excel a emitir 200 comprobantes al día sin errores.',name:'Rosa Quispe',role:'Ferretería El Tornillo'},{quote:'La conexión con nuestro ERP por API nos tomó una tarde.',name:'Diego Arce',role:'CTO, Logística Express'},{quote:'Mi contadora me agradece cada fin de mes.',name:'Valeria Torres',role:'Tienda online Kuna'}]}],
+        ['cta',{title:'Emite tu primera factura hoy',text:'Crea tu cuenta en dos minutos. No pedimos tarjeta de crédito.',btn:'Crear cuenta gratis',btnLink:'#precios'}],
+        ['footer',{text:'FacturaFácil',small:'Soporte: lunes a sábado de 8:00 a 20:00'}]]},
+      {title:'Contacto',slug:'contacto',blocks:[
+        ['header',{logo:'FacturaFácil',cta:'Probar gratis',ctaLink:'index.html#precios'}],
+        ['contact',{title:'Agenda una demostración',text:'Te mostramos la plataforma con los datos de tu negocio en una videollamada de 20 minutos.',email:'ventas@facturafacil.app',phone:'+51 1 700 1234',address:'Av. Larco 1301, Miraflores, Lima',hours:'Lunes a viernes, 9:00 a 18:00',button:'Solicitar demostración'}],
+        ['footer',{text:'FacturaFácil',small:'Soporte: lunes a sábado de 8:00 a 20:00'}]]}
+    ]},
+  blanco:{name:'Sitio en blanco',desc:'Solo encabezado, portada y pie. Para empezar desde cero.',
+    theme:{primary:'#1f2937',bg:'#ffffff',text:'#111827',font:'clasica',radius:8,width:1120},
+    pages:[{title:'Inicio',slug:'index',blocks:[['header',{}],['hero',{layout:'center'}],['footer',{}]]}]}
+};
+function fromTemplate(key){
+  const T=TPL[key];
+  return {id:uid(),name:T.name,theme:clone(T.theme),curPage:null,pages:T.pages.map(pg=>({id:uid(),title:pg.title,slug:pg.slug,blocks:pg.blocks.map(([type,over])=>({id:uid(),type,props:Object.assign(B[type].def(),clone(over))}))}))};
+}
+
+/* ===================== Estado, guardado e historial ===================== */
+const LS='taller-web-v1';
+let store, site, page, selId=null, tab='bloque', preview=false;
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&Array.isArray(s.sites)&&s.sites.length)return s;}catch(e){}return {sites:[fromTemplate('cafe')],cur:0};}
+function bind(){store.cur=Math.min(store.cur||0,store.sites.length-1);site=store.sites[store.cur];page=site.pages.find(p=>p.id===site.curPage)||site.pages[0];site.curPage=page.id;CUR=site.theme;}
+function save(){
+  const st=$('#saveSt');
+  try{localStorage.setItem(LS,JSON.stringify(store));st.textContent='Guardado '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});st.classList.remove('err');}
+  catch(e){st.textContent=e&&e.name==='QuotaExceededError'?'Sin espacio para guardar: usa imágenes más pequeñas':'Este navegador no permite guardar: exporta el JSON para no perder cambios';st.classList.add('err');}
+}
+let hist=[],hi=-1,ct=null;
+function snapshot(){const s=JSON.stringify(store);if(hist[hi]===s)return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>60)hist.shift();hi=hist.length-1;updUndo();}
+function commit(){clearTimeout(ct);ct=null;save();snapshot();}
+function queueCommit(){clearTimeout(ct);ct=setTimeout(commit,600);}
+function restore(){store=JSON.parse(hist[hi]);bind();if(selId&&!page.blocks.some(b=>b.id===selId))selId=null;renderAll();save();updUndo();}
+function undo(){if(ct)commit();if(hi>0){hi--;restore();}}
+function redo(){if(hi<hist.length-1){hi++;restore();}}
+function updUndo(){$('#undo').disabled=hi<=0;$('#redo').disabled=hi>=hist.length-1;}
+
+/* ===================== Render ===================== */
+function themeStyle(th){const f=FONTS[th.font]||FONTS.clasica;return `--p:${th.primary};--bg:${th.bg};--tx:${th.text};--onp:${onColor(th.primary)};--r:${th.radius}px;--w:${th.width}px;--fh:'${f.h}',${f.hf};--fb:'${f.b}',${f.bf}`;}
+function renderBlocks(s,pg,mode){
+  const prev=CUR; MODE=mode; CUR=s.theme;
+  const href=p=>mode==='export'?`${p.slug}.html`:'#';
+  const nav=s.pages.map(p=>`<a href="${href(p)}" data-page="${p.id}"${p.id===pg.id?' class="on"':''}>${esc(p.title)}</a>`).join('');
+  const html=pg.blocks.map(b=>{const def=B[b.type];if(!def)return '';const h=def.r(b.props,{nav,home:href(s.pages[0])});
+    return mode==='edit'?`<div class="blk${b.id===selId?' sel':''}" data-id="${b.id}"><div class="blk-tools"><span>${def.label}</span><button type="button" data-tool="up" title="Subir">↑</button><button type="button" data-tool="down" title="Bajar">↓</button><button type="button" data-tool="dup" title="Duplicar">Duplicar</button><button type="button" data-tool="del" title="Eliminar">Eliminar</button></div>${h}</div>`:h;}).join('');
+  MODE='edit'; CUR=prev||s.theme;
+  return html||(mode==='edit'?'<div class="noblk">Esta página está vacía. Agrega un bloque desde la columna izquierda.</div>':'');
+}
+const canvas=$('#canvas');
+function renderCanvas(){
+  canvas.style.cssText=themeStyle(site.theme);
+  canvas.innerHTML=renderBlocks(site,page,preview?'view':'edit');
+  if(!preview)canvas.querySelectorAll('[data-edit]').forEach(el=>{el.setAttribute('contenteditable','plaintext-only');if(el.contentEditable!=='plaintext-only')el.contentEditable='true';});
+}
+function renderTop(){
+  $('#siteSel').innerHTML=store.sites.map((s,i)=>`<option value="${i}"${i===store.cur?' selected':''}>${esc(s.name)}</option>`).join('');
+  $('#pageSel').innerHTML=site.pages.map(p=>`<option value="${p.id}"${p.id===page.id?' selected':''}>${esc(p.title)}</option>`).join('');
+}
+function blockSummary(b){const p=b.props;return p.title||p.logo||p.text||p.caption||'';}
+function renderLib(){
+  $('#lib').innerHTML=`<div class="sec"><h3 class="cap">Agregar bloque</h3><div class="blist">${Object.entries(B).map(([k,b])=>`<button type="button" class="bitem" data-add="${k}"><b>${b.label}</b><span>${b.desc}</span></button>`).join('')}</div><p class="hint">Se inserta debajo del bloque seleccionado.</p></div>
+  <div class="sec"><h3 class="cap">Estructura de «${esc(page.title)}»</h3><ol class="outline">${page.blocks.map(b=>`<li><button type="button" data-sel="${b.id}"${b.id===selId?' class="on"':''}>${B[b.type]?.label||b.type}<small>${esc(blockSummary(b))}</small></button></li>`).join('')}</ol></div>
+  <div class="sec"><button type="button" class="b" data-act="templates">Ver plantillas base</button></div>`;
+}
+function fid(scope,path){return `f-${scope}-${path.replace(/\./g,'-')}`;}
+function fieldHTML(f,val,path,scope,label){
+  const id=fid(scope,path), da=`data-scope="${scope}" data-path="${path}"`;
+  switch(f.t){
+    case 'textarea':return `<label class="fld" for="${id}"><span>${f.l}</span><textarea id="${id}" ${da} rows="3">${esc(val)}</textarea></label>`;
+    case 'select':return `<label class="fld" for="${id}"><span>${f.l}</span><select id="${id}" ${da}>${f.o.map(([v,l])=>`<option value="${v}"${String(val??'')===v?' selected':''}>${l}</option>`).join('')}</select></label>`;
+    case 'color':return `<div class="fld"><span>${f.l}</span><label class="colrow" for="${id}"><input type="color" id="${id}" ${da} value="${esc(val)}"><output>${esc(val)}</output></label></div>`;
+    case 'range':return `<label class="fld" for="${id}"><span>${f.l}</span><span class="rangerow"><input type="range" id="${id}" ${da} min="${f.min}" max="${f.max}" value="${esc(val)}"><output>${esc(val)}${f.u||''}</output></span></label>`;
+    case 'image':{const isData=String(val||'').startsWith('data:');return `<div class="fld"><span>${f.l}</span><div class="imgrow"><img src="${val?esc(val):ph(label)}" alt=""><div class="imgctl"><input type="url" id="${id}" ${da} aria-label="Dirección de la imagen" placeholder="${isData?'Imagen subida desde tu equipo':'https://… (se ve al exportar)'}" value="${isData?'':esc(val)}"><span class="mrow"><label class="b small">Subir imagen<input type="file" accept="image/*" ${da} hidden></label>${val?`<button type="button" class="lnk" data-act="img-clear" ${da}>Quitar</button>`:''}</span></div></div></div>`;}
+    case 'list':return `<div class="fld"><span>${f.l}</span>${(val||[]).map((it,i)=>`<fieldset class="item"><legend>${f.il} ${i+1}<button type="button" class="lnk" data-act="list-del" data-path="${f.k}" data-i="${i}">Quitar</button></legend>${f.sub.map(sf=>fieldHTML(sf,it[sf.k],`${f.k}.${i}.${sf.k}`,scope,it.caption||it.title)).join('')}</fieldset>`).join('')}<button type="button" class="b small" data-act="list-add" data-path="${f.k}">Añadir ${f.il.toLowerCase()}</button></div>`;
+    default:return `<label class="fld" for="${id}"><span>${f.l}</span><input id="${id}" ${da} value="${esc(val)}"></label>`;
+  }
+}
+const selBlock=()=>page.blocks.find(b=>b.id===selId);
+function renderPanel(){
+  CUR=site.theme;
+  const tabs=`<div class="tabs" role="tablist">${[['bloque','Bloque'],['diseno','Diseño'],['paginas','Sitio y páginas']].map(([k,l])=>`<button type="button" role="tab" data-tab="${k}"${tab===k?' class="on"':''}>${l}</button>`).join('')}</div>`;
+  let body='';
+  if(tab==='bloque'){
+    const b=selBlock();
+    if(!b)body=`<div class="empty"><strong>Ningún bloque seleccionado.</strong><br>Haz clic en cualquier sección de la página para editar sus opciones aquí. Los textos también se pueden escribir directamente sobre la página.</div>`;
+    else{const def=B[b.type];const fields=[...def.f,...(def.sec===false?[]:COMMON)];
+      body=`<div class="phead"><p class="cap">Bloque</p><h2>${def.label}</h2></div>${fields.map(f=>fieldHTML(f,b.props[f.k],f.k,'block',b.props.title)).join('')}
+      ${def.f.some(f=>f.t==='image'||f.sub?.some(s=>s.t==='image'))?'<p class="hint">Las imágenes que subas se guardan dentro del sitio. Las imágenes por URL se muestran en el HTML exportado; este editor solo puede mostrar las subidas.</p>':''}
+      <div class="acts"><button type="button" class="b small" data-tool="up">Subir</button><button type="button" class="b small" data-tool="down">Bajar</button><button type="button" class="b small" data-tool="dup">Duplicar</button><button type="button" class="b small warn" data-tool="del">Eliminar bloque</button></div>`;}
+  }else if(tab==='diseno'){
+    const th=site.theme;
+    body=`<div class="phead"><p class="cap">Diseño global</p><h2>Colores y tipografía</h2></div>
+    <div class="fld"><span>Paletas rápidas</span><div class="pals">${PALS.map((p,i)=>`<button type="button" class="pal" data-act="pal" data-i="${i}"><i><b style="background:${p[1]}"></b><b style="background:${p[2]}"></b><b style="background:${p[3]}"></b></i>${p[0]}</button>`).join('')}</div></div>
+    ${fieldHTML({l:'Color principal',t:'color'},th.primary,'primary','theme')}
+    ${fieldHTML({l:'Fondo',t:'color'},th.bg,'bg','theme')}
+    ${fieldHTML({l:'Texto',t:'color'},th.text,'text','theme')}
+    ${fieldHTML({l:'Tipografía',t:'select',o:Object.entries(FONTS).map(([k,f])=>[k,`${f.n} · ${f.h} + ${f.b}`])},th.font,'font','theme')}
+    ${fieldHTML({l:'Redondeo de esquinas',t:'range',min:0,max:28,u:' px'},th.radius,'radius','theme')}
+    ${fieldHTML({l:'Ancho del contenido',t:'select',o:[['960','Estrecho · 960 px'],['1080','Medio · 1080 px'],['1120','Normal · 1120 px'],['1160','Amplio · 1160 px'],['1280','Muy amplio · 1280 px']]},String(th.width),'width','theme')}
+    <p class="hint">Estos valores se aplican a todas las páginas del sitio, como el tema de un CMS.</p>`;
+  }else{
+    body=`<div class="phead"><p class="cap">Sitio</p><h2>${esc(site.name)}</h2></div>
+    <label class="fld" for="f-site-name"><span>Nombre del sitio</span><input id="f-site-name" data-scope="site" data-path="name" value="${esc(site.name)}"></label>
+    <div class="fld"><span>Páginas (la primera se exporta como inicio)</span>${site.pages.map((p,i)=>`<div class="pgrow${p.id===page.id?' on':''}"><input aria-label="Título de la página" data-scope="page" data-pid="${p.id}" data-path="title" value="${esc(p.title)}"><input aria-label="Nombre del archivo" data-scope="page" data-pid="${p.id}" data-path="slug" value="${esc(p.slug)}" title="Nombre del archivo: ${esc(p.slug)}.html"><div class="acts"><button type="button" class="b small" data-act="page-go" data-pid="${p.id}">Editar</button>${i>0?`<button type="button" class="b small" data-act="page-up" data-pid="${p.id}">Subir</button>`:''}${site.pages.length>1?`<button type="button" class="b small warn" data-act="page-del" data-pid="${p.id}">Eliminar</button>`:''}</div></div>`).join('')}</div>
+    <button type="button" class="b" data-act="page-add">Agregar página</button>
+    <p class="hint">Las páginas nuevas copian el encabezado y el pie de la primera página. El menú del encabezado se genera solo con estas páginas.</p>
+    ${store.sites.length>1?`<div class="acts"><button type="button" class="b small warn" data-act="site-del">Eliminar este sitio</button></div>`:''}`;
+  }
+  $('#props').innerHTML=tabs+`<div class="pbody">${body}</div>`;
+}
+function renderAll(){renderTop();renderCanvas();renderLib();renderPanel();}
+
+/* ===================== Acciones ===================== */
+function select(id){
+  if(selId===id)return;selId=id;
+  canvas.querySelectorAll('.blk').forEach(el=>el.classList.toggle('sel',el.dataset.id===id));
+  tab='bloque';renderPanel();renderLib();
+}
+function goPage(id){const pg=site.pages.find(p=>p.id===id);if(!pg)return;page=pg;site.curPage=id;selId=null;renderAll();$('#stage').scrollTop=0;save();}
+function blockAction(act,id){
+  const bs=page.blocks,i=bs.findIndex(b=>b.id===id);if(i<0)return;
+  if(act==='up'&&i>0)[bs[i-1],bs[i]]=[bs[i],bs[i-1]];
+  else if(act==='down'&&i<bs.length-1)[bs[i+1],bs[i]]=[bs[i],bs[i+1]];
+  else if(act==='dup'){const c=clone(bs[i]);c.id=uid();bs.splice(i+1,0,c);selId=c.id;}
+  else if(act==='del'){bs.splice(i,1);selId=null;toast('Bloque eliminado · Ctrl+Z para deshacer');}
+  else return;
+  renderCanvas();renderLib();renderPanel();commit();
+  const el=canvas.querySelector(`[data-id="${selId||id}"]`);if(el&&act!=='del')el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function addBlock(type){
+  const bs=page.blocks;let i=bs.findIndex(b=>b.id===selId);
+  if(i<0)i=bs.length&&bs[bs.length-1].type==='footer'?bs.length-2:bs.length-1;
+  const nb={id:uid(),type,props:B[type].def()};bs.splice(i+1,0,nb);selId=nb.id;tab='bloque';
+  renderCanvas();renderLib();renderPanel();commit();
+  const el=canvas.querySelector(`[data-id="${nb.id}"]`);if(el)el.scrollIntoView({block:'center',behavior:'smooth'});
+}
+let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.hidden=false;clearTimeout(tt);tt=setTimeout(()=>el.hidden=true,2400);}
+function armed(btn){if(btn.classList.contains('arm'))return true;const o=btn.textContent;btn.classList.add('arm');btn.textContent='¿Seguro? Pulsa otra vez';setTimeout(()=>{btn.classList.remove('arm');btn.textContent=o;},3000);return false;}
+function readImage(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{if(file.type==='image/svg+xml')return res(fr.result);const img=new Image();img.onerror=rej;img.onload=()=>{const k=Math.min(1,1600/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.82));};img.src=fr.result;};fr.readAsDataURL(file);});}
+
+/* ===================== Eventos del lienzo ===================== */
+canvas.addEventListener('click',e=>{
+  const a=e.target.closest('a');if(a)e.preventDefault();
+  if(preview){
+    if(a){const h=a.getAttribute('href')||'';const pg=a.dataset.page?site.pages.find(p=>p.id===a.dataset.page):site.pages.find(p=>h.split('#')[0]===p.slug+'.html');
+      if(pg&&pg.id!==page.id){goPage(pg.id);return;}
+      const anc=h.split('#')[1];if(anc){const tg=canvas.querySelector('#'+CSS.escape(anc));if(tg)tg.scrollIntoView({behavior:'smooth'});}}
+    return;
+  }
+  const tool=e.target.closest('[data-tool]');if(tool){blockAction(tool.dataset.tool,tool.closest('.blk').dataset.id);return;}
+  const nav=e.target.closest('nav [data-page]');if(nav){goPage(nav.dataset.page);return;}
+  const blk=e.target.closest('.blk');if(blk)select(blk.dataset.id);
+});
+canvas.addEventListener('submit',e=>{e.preventDefault();toast(preview?'En el sitio exportado el formulario muestra un mensaje de gracias':'Formulario de ejemplo: se conecta a tu servidor al publicar');});
+canvas.addEventListener('input',e=>{
+  const el=e.target.closest('[data-edit]');if(!el)return;
+  const blk=el.closest('.blk'),b=page.blocks.find(x=>x.id===blk.dataset.id);if(!b)return;
+  const m=el.dataset.multi;let v;
+  if(m==='p')v=el.innerText.replace(/\n{3,}/g,'\n\n').trim();
+  else if(m==='l')v=el.innerText.split('\n').map(s=>s.trim()).filter(Boolean).join('\n');
+  else v=el.innerText.replace(/\s*\n\s*/g,' ');
+  setPath(b.props,el.dataset.edit,v);
+  if(selId!==b.id)select(b.id);
+  else{const f=document.getElementById(fid('block',el.dataset.edit));if(f&&f!==document.activeElement)f.value=v;}
+  queueCommit();
+});
+canvas.addEventListener('keydown',e=>{const el=e.target.closest&&e.target.closest('[data-edit]');if(el&&e.key==='Enter'&&!el.dataset.multi){e.preventDefault();el.blur();}});
+canvas.addEventListener('focusout',e=>{if(e.target.closest&&e.target.closest('[data-edit]')){if(ct)commit();renderLib();}});
+
+/* ===================== Eventos del panel ===================== */
+const props=$('#props');
+props.addEventListener('input',e=>{
+  const el=e.target,path=el.dataset.path;if(!path||el.type==='file')return;
+  let v=el.type==='range'?+el.value:el.value;const sc=el.dataset.scope;
+  if(sc==='block'){const b=selBlock();if(!b)return;setPath(b.props,path,v);}
+  else if(sc==='theme'){site.theme[path]=path==='width'?+v:v;const o=el.parentElement.querySelector('output');if(o)o.textContent=v+(el.type==='range'?' px':'');}
+  else if(sc==='site'){site.name=v;renderTop();}
+  else if(sc==='page'){const pg=site.pages.find(p=>p.id===el.dataset.pid);if(path==='slug')return;pg.title=v;renderTop();}
+  renderCanvas();queueCommit();
+});
+props.addEventListener('change',async e=>{
+  const el=e.target;
+  if(el.type==='file'&&el.files[0]){try{const url=await readImage(el.files[0]);setPath(selBlock().props,el.dataset.path,url);renderCanvas();renderPanel();commit();toast('Imagen agregada');}catch(err){toast('No se pudo leer esa imagen. Prueba con JPG o PNG.');}return;}
+  if(el.dataset.scope==='page'&&el.dataset.path==='slug'){const pg=site.pages.find(p=>p.id===el.dataset.pid);let s=slugify(el.value)||'pagina';if(site.pages.some(p=>p!==pg&&p.slug===s))s+='-2';pg.slug=s;el.value=s;commit();}
+  if(el.dataset.scope==='block'&&el.tagName==='SELECT')renderPanel();
+  if(el.dataset.scope&&el.dataset.scope!=='page')commit();
+  if(el.dataset.scope==='theme'||el.dataset.scope==='site'||el.dataset.scope==='page')renderLib();
+});
+props.addEventListener('click',e=>{
+  const tb=e.target.closest('[data-tab]');if(tb){tab=tb.dataset.tab;renderPanel();return;}
+  const tool=e.target.closest('[data-tool]');if(tool&&selId){blockAction(tool.dataset.tool,selId);return;}
+  const a=e.target.closest('[data-act]');if(!a)return;const act=a.dataset.act;
+  if(act==='list-add'){const b=selBlock();const f=B[b.type].f.find(x=>x.k===a.dataset.path);b.props[f.k].push(f.d());}
+  else if(act==='list-del'){const b=selBlock();b.props[a.dataset.path].splice(+a.dataset.i,1);}
+  else if(act==='img-clear'){setPath(selBlock().props,a.dataset.path,'');}
+  else if(act==='pal'){const p=PALS[+a.dataset.i];Object.assign(site.theme,{primary:p[1],bg:p[2],text:p[3]});}
+  else if(act==='page-go'){goPage(a.dataset.pid);return;}
+  else if(act==='page-up'){const i=site.pages.findIndex(p=>p.id===a.dataset.pid);[site.pages[i-1],site.pages[i]]=[site.pages[i],site.pages[i-1]];renderTop();}
+  else if(act==='page-del'){if(!armed(a))return;const i=site.pages.findIndex(p=>p.id===a.dataset.pid);site.pages.splice(i,1);if(page.id===a.dataset.pid){page=site.pages[0];site.curPage=page.id;selId=null;}renderAll();commit();return;}
+  else if(act==='page-add'){const first=site.pages[0];let n=site.pages.length+1,slug='pagina-'+n;while(site.pages.some(p=>p.slug===slug))slug='pagina-'+(++n);
+    const keep=t=>first.blocks.filter(b=>b.type===t).slice(0,1).map(b=>({...clone(b),id:uid()}));
+    const pg={id:uid(),title:'Página '+n,slug,blocks:[...keep('header'),{id:uid(),type:'text',props:B.text.def()},...keep('footer')]};
+    site.pages.push(pg);goPage(pg.id);tab='paginas';renderPanel();commit();return;}
+  else if(act==='site-del'){if(!armed(a))return;store.sites.splice(store.cur,1);store.cur=0;bind();selId=null;tab='bloque';renderAll();commit();toast('Sitio eliminado');return;}
+  else return;
+  renderCanvas();renderPanel();commit();
+});
+
+/* ===================== Biblioteca y barra superior ===================== */
+$('#lib').addEventListener('click',e=>{
+  const ad=e.target.closest('[data-add]');if(ad){addBlock(ad.dataset.add);return;}
+  const s=e.target.closest('[data-sel]');if(s){select(s.dataset.sel);const el=canvas.querySelector(`[data-id="${s.dataset.sel}"]`);if(el)el.scrollIntoView({block:'start',behavior:'smooth'});return;}
+  if(e.target.closest('[data-act="templates"]'))openTemplates();
+});
+$('#siteSel').addEventListener('change',e=>{store.cur=+e.target.value;bind();selId=null;renderAll();save();});
+$('#pageSel').addEventListener('change',e=>goPage(e.target.value));
+$('#devSeg').addEventListener('click',e=>{const b=e.target.closest('[data-dev]');if(!b)return;$('#devSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));$('#frame').style.setProperty('--dev',b.dataset.dev);});
+$('#undo').addEventListener('click',undo);$('#redo').addEventListener('click',redo);
+$('#prevBtn').addEventListener('click',()=>{preview=!preview;$('#app').classList.toggle('preview',preview);$('#prevBtn').textContent=preview?'Volver a editar':'Vista previa';$('#prevBtn').classList.toggle('pri',preview);renderCanvas();});
+$('#newSite').addEventListener('click',openTemplates);
+$('#expBtn').addEventListener('click',openExport);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#modal').hidden){closeModal();return;}
+  const tg=e.target,typing=tg.isContentEditable||/INPUT|TEXTAREA|SELECT/.test(tg.tagName);
+  if((e.ctrlKey||e.metaKey)&&!typing){const k=e.key.toLowerCase();if(k==='z'&&!e.shiftKey){e.preventDefault();undo();}else if(k==='y'||(k==='z'&&e.shiftKey)){e.preventDefault();redo();}}
+});
+
+/* ===================== Ventanas: plantillas y exportación ===================== */
+function openModal(title,html){$('#mTitle').textContent=title;$('#mBody').innerHTML=html;$('#modal').hidden=false;}
+function closeModal(){$('#modal').hidden=true;$('#mBody').innerHTML='';}
+$('#mClose').addEventListener('click',closeModal);
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+function openTemplates(){
+  openModal('Crear un sitio desde una plantilla base',`<p class="hint" style="margin-bottom:14px">La plantilla se copia como un sitio nuevo. Después puedes cambiar textos, colores, imágenes y páginas sin tocar la original.</p><div class="tgrid">${Object.entries(TPL).map(([k,T])=>{const s=fromTemplate(k);return `<div class="tcard"><div class="tthumb"><div class="pw" style="${themeStyle(s.theme)}">${renderBlocks(s,s.pages[0],'view')}</div></div><div class="tinfo"><h3>${esc(T.name)}</h3><p>${esc(T.desc)}</p><button type="button" class="b pri" data-tpl="${k}">Usar esta plantilla</button></div></div>`;}).join('')}</div>`);
+}
+function exportPage(s,pg){
+  const f=FONTS[s.theme.font]||FONTS.clasica;
+  return `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(pg.title)} | ${esc(s.name)}</title>
+<link rel="stylesheet" href="${fontURL([[f.h,f.hw],[f.b,f.bw]]).replace(/&/g,'&amp;')}">
+<style>
+body{margin:0}
+html{scroll-behavior:smooth}${SITE_CSS}
+</style>
+</head>
+<body>
+<div class="pw" style="${themeStyle(s.theme).replace(/"/g,'&quot;')}">
+${renderBlocks(s,pg,'export')}
+</div>
+</body>
+</html>`;
+}
+let expTab='html';
+function openExport(){
+  openModal('Exportar «'+site.name+'»',`<div class="tabs" style="position:static">${[['html','HTML por página'],['json','Sitio en JSON'],['imp','Importar JSON']].map(([k,l])=>`<button type="button" data-et="${k}"${expTab===k?' class="on"':''}>${l}</button>`).join('')}</div><div id="ePane" style="display:flex;flex-direction:column;gap:12px;padding-top:14px"></div>`);
+  renderExport();
+}
+function renderExport(){
+  const pane=$('#ePane');if(!pane)return;
+  $('#mBody').querySelectorAll('[data-et]').forEach(b=>b.classList.toggle('on',b.dataset.et===expTab));
+  if(expTab==='html'){
+    pane.innerHTML=`<div class="mrow"><label class="lbl" for="expPage">Página</label><select id="expPage">${site.pages.map(p=>`<option value="${p.id}"${p.id===page.id?' selected':''}>${esc(p.title)} → ${esc(p.slug)}.html</option>`).join('')}</select><button type="button" class="b pri" data-copy="expCode">Copiar código</button></div><p class="hint">Guarda cada página con el nombre indicado en la misma carpeta y súbela a cualquier hosting estático (GitHub Pages, Netlify, IIS). Los enlaces del menú ya apuntan a esos archivos.</p><textarea id="expCode" readonly spellcheck="false" aria-label="Código HTML"></textarea>`;
+    const fill=()=>{$('#expCode').value=exportPage(site,site.pages.find(p=>p.id===$('#expPage').value));};fill();$('#expPage').addEventListener('change',fill);
+  }else if(expTab==='json'){
+    pane.innerHTML=`<div class="mrow"><button type="button" class="b pri" data-copy="expJson">Copiar JSON</button></div><p class="hint">Este JSON es el modelo completo del sitio (tema, páginas y bloques). Es lo que guardarías en una base de datos en la versión con servidor.</p><textarea id="expJson" readonly spellcheck="false" aria-label="JSON del sitio"></textarea>`;
+    $('#expJson').value=JSON.stringify(site,null,2);
+  }else{
+    pane.innerHTML=`<p class="hint">Pega aquí un JSON exportado desde Taller Web para traerlo como un sitio nuevo.</p><textarea id="impJson" spellcheck="false" aria-label="JSON para importar" placeholder='{"name":"Mi sitio","theme":{…},"pages":[…]}'></textarea><div class="mrow"><button type="button" class="b pri" data-act="import">Importar como sitio nuevo</button><span id="impMsg" class="hint"></span></div>`;
+  }
+}
+$('#mBody').addEventListener('click',async e=>{
+  const tp=e.target.closest('[data-tpl]');if(tp){const s=fromTemplate(tp.dataset.tpl);store.sites.push(s);store.cur=store.sites.length-1;bind();selId=null;tab='bloque';closeModal();renderAll();commit();toast('Sitio creado desde «'+TPL[tp.dataset.tpl].name+'»');return;}
+  const et=e.target.closest('[data-et]');if(et){expTab=et.dataset.et;renderExport();return;}
+  const cp=e.target.closest('[data-copy]');if(cp){const ta=document.getElementById(cp.dataset.copy);try{await navigator.clipboard.writeText(ta.value);toast('Copiado al portapapeles');}catch(err){ta.focus();ta.select();toast('Texto seleccionado: cópialo con Ctrl+C');}return;}
+  if(e.target.closest('[data-act="import"]')){
+    const msg=$('#impMsg');
+    try{const s=JSON.parse($('#impJson').value);if(!s||!Array.isArray(s.pages)||!s.pages.length||!s.theme)throw 0;
+      s.id=uid();s.name=(s.name||'Sitio importado');s.pages.forEach(p=>{p.id=p.id||uid();p.blocks=(p.blocks||[]).filter(b=>B[b.type]).map(b=>({id:uid(),type:b.type,props:Object.assign(B[b.type].def(),b.props||{})}));});
+      s.curPage=null;store.sites.push(s);store.cur=store.sites.length-1;bind();selId=null;closeModal();renderAll();commit();toast('Sitio importado');
+    }catch(err){msg.textContent='Ese texto no es un sitio válido. Debe incluir "theme" y "pages".';msg.style.color='var(--e-danger)';}
+  }
+});
+
+/* ===================== Inicio ===================== */
+(function(){
+  const l=document.createElement('link');l.rel='stylesheet';
+  l.href=fontURL([['IBM Plex Sans','400;500;600;700'],['IBM Plex Mono','400;600'],...Object.values(FONTS).flatMap(f=>[[f.h,f.hw],[f.b,f.bw]])]);
+  document.head.appendChild(l);
+  const st=document.createElement('style');st.textContent=SITE_CSS;document.head.appendChild(st);
+  store=load();bind();
+  const first=page.blocks.find(b=>b.type==='hero');selId=first?first.id:null;
+  renderAll();snapshot();updUndo();
+  if(!$('#saveSt').classList.contains('err'))$('#saveSt').textContent='Guardado automático';
+})();
+</script>
+</body>
+</html>
