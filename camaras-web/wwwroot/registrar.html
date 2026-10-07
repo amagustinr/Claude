@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar cámaras</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="pagina">
+    <div class="cabecera">
+      <a class="btn" href="/">← Volver</a>
+      <h1>Registrar cámara Dahua / Axis</h1>
+      <div style="min-width:260px">
+        <select id="cmbSucursales" aria-label="Sucursal"><option value="">— Seleccionar sucursal —</option></select>
+      </div>
+    </div>
+
+    <form class="panel" id="frm" autocomplete="off">
+      <div class="form">
+        <div class="campo"><label for="nombreSucursal">Nombre sucursal</label><input id="nombreSucursal" required></div>
+        <div class="campo"><label for="descripcion">Descripción</label><input id="descripcion"></div>
+        <div class="campo"><label for="usuario">Usuario</label><input id="usuario" autocomplete="off"></div>
+        <div class="campo">
+          <label for="contrasena">Contraseña</label>
+          <input id="contrasena" type="password" autocomplete="new-password">
+          <div class="ayuda" id="ayudaPass"></div>
+        </div>
+        <div class="campo">
+          <label for="ip">IP</label><input id="ip" required placeholder="192.168.1.100">
+          <div class="ayuda">También acepta IP:puerto o una URL rtsp:// completa.</div>
+        </div>
+        <div class="campo">
+          <label for="tipoCam">Tipo cámara</label>
+          <select id="tipoCam"><option value="1">1 - Axis</option><option value="2">2 - Dahua</option></select>
+        </div>
+        <div class="campo"><label for="monitor">Monitor</label><input id="monitor" type="number" min="1" required></div>
+        <div class="campo"><label for="posicion">Posición</label><input id="posicion" type="number" min="1" required></div>
+        <div class="campo"><label for="webcam">Web cam</label><input id="webcam"></div>
+        <div class="campo check"><label><input type="checkbox" id="activar"> Activar H.264</label></div>
+      </div>
+
+      <div class="fila-acciones">
+        <button type="submit" class="primario" id="btnGuardar">Guardar</button>
+        <button type="button" id="btnNuevo">Nuevo</button>
+        <button type="button" id="btnRefrescar">Refrescar</button>
+        <span class="espacio"></span>
+        <span class="id-edicion" id="lblId"></span>
+      </div>
+    </form>
+
+    <div class="tabla-wrap"><table id="tabla"><thead></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script type="module" src="/js/registrar.js"></script>
+</body>
+</html>

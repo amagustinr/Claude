@@ -1,0 +1,27 @@
+# Salidas de compilación / publicación
+bin/
+obj/
+publish/
+out/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# go2rtc (se descarga con scripts\descargar-go2rtc.ps1)
+go2rtc/
+*.exe
+
+# Logs y temporales
+*.log
+logs/
+*.tmp
+
+# Configuración local con credenciales reales
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.local.json
