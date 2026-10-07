@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cámaras Sucursales</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <main class="centro">
+    <form class="tarjeta" id="frm" autocomplete="off">
+      <h1><img src="/favicon.ico" alt="">Cámaras Dahua / Axis</h1>
+      <p class="sub">Selecciona el monitor a mostrar.</p>
+
+      <label for="txtMonitor">Monitor</label>
+      <input id="txtMonitor" type="number" min="1" step="1" inputmode="numeric" required autofocus>
+
+      <div class="acciones">
+        <button type="submit" class="primario">Aceptar</button>
+        <a class="btn" href="/registrar.html">Registrar cámara</a>
+      </div>
+
+      <div class="estado-srv"><span class="punto" id="punto"></span><span id="estado">Verificando servidor…</span></div>
+    </form>
+  </main>
+
+  <script>
+    const txt = document.getElementById('txtMonitor');
+    try { txt.value = localStorage.getItem('camaras.monitor') || ''; } catch { }
+    txt.select();
+
+    document.getElementById('frm').addEventListener('submit', e => {
+      e.preventDefault();
+      const m = parseInt(txt.value, 10);
+      if (!m || m < 1) { txt.focus(); return; }
+      try { localStorage.setItem('camaras.monitor', m); } catch { }
+      location.href = `/visor.html?monitor=${m}`;
+    });
+
+    fetch('/api/estado').then(r => r.json()).then(s => {
+      document.getElementById('punto').className = 'punto ' + (s.go2rtc ? 'ok' : 'error');
+      document.getElementById('estado').textContent =
+        (s.go2rtc ? 'Servidor de video listo' : 'go2rtc no está en ejecución') +
+        ` · datos: ${s.modoDatos} · v${s.version}`;
+    }).catch(() => {
+      document.getElementById('punto').className = 'punto error';
+      document.getElementById('estado').textContent = 'No se pudo contactar al servidor';
+    });
+  </script>
+</body>
+</html>

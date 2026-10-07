@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cámaras</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="visor">
+  <div class="grilla" id="grilla"></div>
+
+  <div class="barra" id="barra">
+    <span class="etq" id="etqMonitor"></span>
+    <button id="btnRecargar" title="Recargar cámaras (F5)">⟳ Recargar</button>
+    <button id="btnAjuste" title="Alternar ajustar / estirar (A)">▭ Ajuste</button>
+    <button id="btnPantalla" title="Pantalla completa (F)">⛶ Pantalla completa</button>
+    <button id="btnMonitor" title="Cambiar monitor">⚙ Monitor</button>
+  </div>
+
+  <div class="aviso-global" id="aviso" hidden>
+    <div class="caja">
+      <h2 id="avisoTitulo">Sin conexión</h2>
+      <p id="avisoTexto"></p>
+      <button class="primario" id="avisoReintentar">Reintentar</button>
+      <a class="btn" href="/">Volver</a>
+    </div>
+  </div>
+
+  <script type="module" src="/js/visor.js"></script>
+</body>
+</html>
