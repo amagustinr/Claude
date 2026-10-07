@@ -1,0 +1,35 @@
+name: Soundboard - compilar APK Android
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'soundboard/maui/**', '.github/workflows/soundboard-android.yml' ]
+  pull_request:
+    paths: [ 'soundboard/maui/**', '.github/workflows/soundboard-android.yml' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
+
+      - name: Instalar workload de MAUI Android
+        run: dotnet workload install maui-android
+
+      - name: Compilar APK
+        run: dotnet publish soundboard/maui/SoundboardApp/SoundboardApp.csproj -f net10.0-android -c Release -o out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MiSoundboard-apk
+          path: out/*-Signed.apk
