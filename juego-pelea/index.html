@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arena de Pelea</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <!-- 1. Inicio -->
+      <section id="pantalla-inicio" class="pantalla activa">
+        <h1 class="logo">ARENA<span>DE PELEA</span></h1>
+        <div class="tarjeta">
+          <label for="nombre">Tu nombre de jugador</label>
+          <input id="nombre" maxlength="16" placeholder="Ej: Alex" autocomplete="nickname" />
+          <div class="botones">
+            <button id="btn-en-linea" class="primario">Jugar en línea</button>
+            <button id="btn-practica">Modo práctica</button>
+          </div>
+          <p id="aviso-config" class="error oculto">
+            Falta configurar Supabase: define VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.
+          </p>
+        </div>
+        <details class="tarjeta ayuda">
+          <summary>Controles</summary>
+          <ul>
+            <li><kbd>A</kbd> <kbd>D</kbd> o flechas: moverse (hacia atrás = bloquear)</li>
+            <li><kbd>W</kbd> o <kbd>↑</kbd>: saltar · <kbd>S</kbd> o <kbd>↓</kbd>: agacharse</li>
+            <li><kbd>J</kbd> o <kbd>Z</kbd>: golpe · <kbd>K</kbd> o <kbd>X</kbd>: patada</li>
+            <li>Agachado + patada = barrida (solo se bloquea agachado). Los ataques en el aire se bloquean de pie.</li>
+          </ul>
+        </details>
+      </section>
+
+      <!-- 2. Sala de espera -->
+      <section id="pantalla-lobby" class="pantalla">
+        <header class="barra">
+          <button class="volver" data-ir="inicio">← Salir</button>
+          <h2>Jugadores conectados</h2>
+          <span id="lobby-yo" class="etiqueta"></span>
+        </header>
+        <ul id="lista-jugadores" class="lista"></ul>
+        <p id="lobby-vacio" class="nota">Nadie más conectado todavía. Comparte el enlace con un amigo.</p>
+        <p id="lobby-estado" class="nota"></p>
+      </section>
+
+      <!-- 3. Selección de personaje -->
+      <section id="pantalla-seleccion" class="pantalla">
+        <header class="barra">
+          <button class="volver" id="btn-salir-seleccion">← Salir</button>
+          <h2 id="titulo-seleccion">Elige tu luchador</h2>
+          <span id="sel-rival" class="etiqueta"></span>
+        </header>
+        <div id="grilla-personajes" class="grilla"></div>
+        <footer class="pie-seleccion">
+          <div id="sel-estado" class="nota"></div>
+          <button id="btn-listo" class="primario" disabled>¡Listo!</button>
+        </footer>
+      </section>
+
+      <!-- 4. Pelea -->
+      <section id="pantalla-pelea" class="pantalla">
+        <div class="escenario">
+          <canvas id="lienzo"></canvas>
+          <!-- Controles táctiles (solo en pantallas táctiles) -->
+          <div id="tactil" class="tactil">
+            <div id="cruceta" class="cruceta" aria-label="Cruceta: arriba salta, abajo se agacha, izquierda y derecha mueven, centro golpea">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <circle class="aro" cx="50" cy="50" r="47" />
+                <path data-dir="u" class="flecha" d="M50 9 L61 22 H55 V31 H45 V22 H39 Z" />
+                <path data-dir="d" class="flecha" d="M50 91 L61 78 H55 V69 H45 V78 H39 Z" />
+                <path data-dir="l" class="flecha" d="M9 50 L22 39 V45 H31 V55 H22 V61 Z" />
+                <path data-dir="r" class="flecha" d="M91 50 L78 39 V45 H69 V55 H78 V61 Z" />
+                <circle data-dir="p" class="centro" cx="50" cy="50" r="15" />
+              </svg>
+            </div>
+            <button class="btn-patada" data-accion="k" aria-label="Patada">Patada</button>
+          </div>
+          <div id="girar" class="girar">↻ Gira el celular para jugar en horizontal</div>
+          <div id="fin-combate" class="superpuesto oculto">
+            <h2 id="fin-texto"></h2>
+            <div class="botones">
+              <button id="btn-revancha" class="primario">Revancha</button>
+              <button id="btn-salir-pelea">Salir</button>
+            </div>
+          </div>
+        </div>
+        <p class="nota centro"><span class="ayuda-teclas">Mover: A/D · Saltar: W · Agacharse: S · Golpe: J · Patada: K · Hacia atrás bloquea</span>
+          <button id="btn-abandonar" class="enlace">Abandonar</button></p>
+      </section>
+
+      <!-- Diálogo genérico (retos, avisos) -->
+      <dialog id="dialogo">
+        <p id="dialogo-texto"></p>
+        <div class="botones">
+          <button id="dialogo-si" class="primario">Aceptar</button>
+          <button id="dialogo-no">Rechazar</button>
+        </div>
+      </dialog>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

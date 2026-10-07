@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Panel de personajes</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main id="app">
+      <!-- Login -->
+      <section id="vista-login" class="pantalla activa">
+        <h1 class="logo">PANEL<span>ADMINISTRADOR</span></h1>
+        <form id="form-login" class="tarjeta">
+          <label for="email">Usuario (correo)</label>
+          <input id="email" type="email" autocomplete="username" required />
+          <label for="clave">Contraseña</label>
+          <input id="clave" type="password" autocomplete="current-password" required />
+          <div class="botones"><button class="primario" type="submit">Entrar</button></div>
+          <p id="login-error" class="error"></p>
+        </form>
+        <p class="nota centro"><a href="/" style="color: inherit">← Volver al juego</a></p>
+      </section>
+
+      <!-- Panel -->
+      <section id="vista-panel" class="pantalla">
+        <header class="barra">
+          <h2>Personajes</h2>
+          <span id="admin-usuario" class="etiqueta"></span>
+          <a href="/" class="nota">Ir al juego</a>
+          <button id="btn-salir">Cerrar sesión</button>
+        </header>
+
+        <div class="admin-grid">
+          <form id="form-personaje" class="tarjeta">
+            <h3 id="form-titulo" style="margin-top: 0">Nuevo personaje</h3>
+
+            <label for="f-nombre">Nombre</label>
+            <input id="f-nombre" maxlength="30" required />
+
+            <label>Sexo</label>
+            <div class="opciones">
+              <label><input type="radio" name="sexo" value="M" checked /> Hombre</label>
+              <label><input type="radio" name="sexo" value="F" /> Mujer</label>
+            </div>
+
+            <div class="fila">
+              <div>
+                <label for="f-altura">Altura (cm)</label>
+                <input id="f-altura" type="number" min="140" max="220" value="175" required />
+              </div>
+              <div>
+                <label for="f-peso">Peso (kg)</label>
+                <input id="f-peso" type="number" min="40" max="160" value="75" required />
+              </div>
+            </div>
+
+            <label for="f-complexion">Complexión</label>
+            <select id="f-complexion">
+              <option value="delgada">Delgada</option>
+              <option value="media" selected>Media</option>
+              <option value="robusta">Robusta</option>
+            </select>
+
+            <label for="f-fuerza">Fuerza <span class="nota">(daño de golpes y patadas)</span></label>
+            <div class="rango"><input id="f-fuerza" type="range" min="1" max="100" value="50" /><output for="f-fuerza">50</output></div>
+            <label for="f-agilidad">Agilidad <span class="nota">(velocidad, salto, rapidez)</span></label>
+            <div class="rango"><input id="f-agilidad" type="range" min="1" max="100" value="50" /><output for="f-agilidad">50</output></div>
+            <label for="f-resistencia">Resistencia <span class="nota">(vida y defensa)</span></label>
+            <div class="rango"><input id="f-resistencia" type="range" min="1" max="100" value="50" /><output for="f-resistencia">50</output></div>
+
+            <fieldset class="apariencia">
+              <legend>Apariencia y ropa</legend>
+              <div class="fila">
+                <div>
+                  <label for="f-traje">Traje</label>
+                  <select id="f-traje"></select>
+                </div>
+                <div>
+                  <label for="f-peinado">Peinado</label>
+                  <select id="f-peinado"></select>
+                </div>
+              </div>
+              <div class="colores">
+                <label>Color principal <input id="f-color_ropa" type="color" value="#f4f4f4" /></label>
+                <label>Color de detalles <input id="f-color_detalle" type="color" value="#222222" /></label>
+                <label>Pelo <input id="f-color_pelo" type="color" value="#3b2416" /></label>
+                <label>Piel <input id="f-color_piel" type="color" value="#e2ad80" /></label>
+              </div>
+              <div id="tonos-piel" class="tonos"></div>
+              <button type="button" id="btn-azar" class="enlace">🎲 Colores al azar</button>
+            </fieldset>
+
+            <label for="f-foto">Foto de la cara <span class="nota">(PNG, JPG o WEBP; se recorta cuadrada)</span></label>
+            <div class="foto-editor">
+              <img id="f-foto-preview" alt="" />
+              <input id="f-foto" type="file" accept="image/png,image/jpeg,image/webp" />
+            </div>
+
+            <label class="switch" style="margin-top: 1rem"><input id="f-disponible" type="checkbox" checked /> Disponible para jugar</label>
+
+            <div class="botones">
+              <button class="primario" type="submit" id="btn-guardar">Guardar</button>
+              <button type="button" id="btn-cancelar" class="oculto">Cancelar edición</button>
+            </div>
+            <p id="form-msg" class="nota"></p>
+          </form>
+
+          <div>
+            <div class="tarjeta" style="margin-bottom: 1rem">
+              <canvas id="vista-previa" width="260" height="325"></canvas>
+              <p class="nota centro" style="margin-bottom: 0">Vista previa en el juego (cambia de pose sola)</p>
+            </div>
+            <div class="tarjeta tabla-scroll">
+              <table>
+                <thead>
+                  <tr><th></th><th>Nombre</th><th>Contextura</th><th>F / A / R</th><th>Disponible</th><th></th></tr>
+                </thead>
+                <tbody id="tabla-personajes"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/admin/admin.js"></script>
+  </body>
+</html>
