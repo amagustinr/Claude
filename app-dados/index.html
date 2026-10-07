@@ -1,0 +1,349 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style></head><body>
+<title>Mesa de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=DM+Sans:wght@400;600&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --felt:#0f3d2e; --felt-2:#0a2c21;
+  --ivory:#f5efe2; --ivory-shade:#d9cfbb; --core:#cfc3aa; --pip:#1b1a17; --pip-red:#b3261e;
+  --ink:#eae6da; --muted:#9fb8ad; --gold:#e3b75a;
+  --display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+html,body{height:100%}
+body{
+  background: radial-gradient(120% 90% at 50% 40%, var(--felt) 0%, var(--felt-2) 100%);
+  background-color: var(--felt-2);
+  color:var(--ink); font-family:var(--body);
+  overflow:hidden; user-select:none; -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.18;
+  background-image: radial-gradient(rgba(255,255,255,.25) .6px, transparent .7px);
+  background-size: 4px 4px;
+}
+.screen{position:relative; height:100%; display:flex; flex-direction:column; padding-inline:16px; box-sizing:border-box}
+
+/* ---------- Pantalla inicial ---------- */
+#setup{justify-content:center; align-items:center; gap:28px; text-align:center}
+.brand{font-family:var(--display); font-weight:800; font-size:clamp(34px,10vw,54px); line-height:1; letter-spacing:-.02em; margin:0; text-wrap:balance}
+.brand span{color:var(--gold)}
+.lead{margin:0; color:var(--muted); font-size:16px}
+.stepper{display:flex; align-items:center; gap:18px}
+.stepper button{
+  width:64px; height:64px; border-radius:50%; border:2px solid rgba(245,239,226,.35);
+  background:transparent; color:var(--ivory); font-size:32px; font-family:var(--display); cursor:pointer;
+}
+.stepper button:active{background:rgba(245,239,226,.12)}
+.stepper button:disabled{opacity:.3}
+#count{
+  font-family:var(--display); font-weight:800; font-size:88px; width:2.2ch; text-align:center;
+  font-variant-numeric:tabular-nums; color:var(--ivory); line-height:1;
+}
+.unit{font-size:14px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:-14px}
+.quick{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+.quick button{
+  min-width:48px; height:40px; padding-inline:12px; border-radius:20px; border:1px solid rgba(245,239,226,.25);
+  background:rgba(0,0,0,.18); color:var(--ink); font:600 15px var(--body); cursor:pointer;
+}
+.quick button[aria-pressed="true"]{background:var(--ivory); color:var(--pip); border-color:var(--ivory)}
+.cta{
+  margin-top:8px; width:min(320px,100%); height:60px; border:none; border-radius:16px;
+  background:var(--gold); color:#2a1d05; font:800 18px var(--display); letter-spacing:.02em; cursor:pointer;
+  box-shadow:0 6px 0 #9c7a2f;
+}
+.cta:active{transform:translateY(4px); box-shadow:0 2px 0 #9c7a2f}
+button:focus-visible{outline:3px solid var(--gold); outline-offset:3px}
+
+/* ---------- Mesa ---------- */
+#table{padding-block:12px}
+.bar{display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:48px}
+.bar-left{display:flex; gap:8px; flex-wrap:wrap}
+.chip{
+  height:40px; padding-inline:14px; border-radius:20px; border:1px solid rgba(245,239,226,.3);
+  background:rgba(0,0,0,.2); color:var(--ink); font:600 14px var(--body); cursor:pointer;
+}
+.total{text-align:right; line-height:1}
+.total small{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.total b{font-family:var(--display); font-size:34px; font-variant-numeric:tabular-nums; color:var(--gold); transition:opacity .2s}
+.total b.pending{opacity:.25}
+#board{
+  flex:1; display:flex; flex-wrap:wrap; align-content:center; justify-content:center;
+  gap:var(--gap,18px); cursor:pointer; touch-action:manipulation; padding-block:12px;
+}
+.hint{text-align:center; color:var(--muted); font-size:15px; margin:0; padding-bottom:14px}
+
+/* ---------- Dado 3D ---------- */
+.die{
+  --s:120px; width:var(--s); height:var(--s); position:relative;
+  perspective: calc(var(--s) * 8);
+}
+.shadow{
+  position:absolute; left:8%; right:8%; bottom:-10%; height:26%;
+  border-radius:50%; background:radial-gradient(closest-side, rgba(0,0,0,.55), rgba(0,0,0,0));
+  transform-origin:50% 50%;
+}
+.hop{position:absolute; inset:0; transform-style:preserve-3d}
+.cube{
+  position:absolute; inset:0; transform-style:preserve-3d;
+  transition: transform 1.15s cubic-bezier(.18,.7,.28,1);
+}
+.cube.instant{transition:none}
+.face, .core{
+  position:absolute; inset:0; box-sizing:border-box; backface-visibility:hidden;
+}
+.face{
+  border-radius:calc(var(--s)*.18); padding:calc(var(--s)*.13);
+  display:grid; grid-template:repeat(3,1fr)/repeat(3,1fr); place-items:center;
+  background: radial-gradient(120% 120% at 30% 25%, #fffdf6 0%, var(--ivory) 45%, var(--ivory-shade) 100%);
+  box-shadow: inset 0 0 calc(var(--s)*.06) rgba(120,100,70,.35);
+}
+.core{ inset:7%; background:var(--core); backface-visibility:visible }
+.f1{transform:translateZ(calc(var(--s)/2))}
+.f6{transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.f3{transform:rotateY(90deg) translateZ(calc(var(--s)/2))}
+.f4{transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+.f2{transform:rotateX(90deg) translateZ(calc(var(--s)/2))}
+.f5{transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+.c1{transform:translateZ(calc(var(--s)*.43))}
+.c2{transform:rotateY(180deg) translateZ(calc(var(--s)*.43))}
+.c3{transform:rotateY(90deg) translateZ(calc(var(--s)*.43))}
+.c4{transform:rotateY(-90deg) translateZ(calc(var(--s)*.43))}
+.c5{transform:rotateX(90deg) translateZ(calc(var(--s)*.43))}
+.c6{transform:rotateX(-90deg) translateZ(calc(var(--s)*.43))}
+
+.pip{width:76%; height:76%; border-radius:50%; visibility:hidden;
+  background:radial-gradient(circle at 40% 35%, #55514a, var(--pip) 65%);
+  box-shadow: inset 0 calc(var(--s)*.012) calc(var(--s)*.02) rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.7)}
+.f1 .pip{background:radial-gradient(circle at 40% 35%, #e0564d, var(--pip-red) 65%); width:100%; height:100%}
+.f1 .p5,
+.f2 .p1,.f2 .p9,
+.f3 .p1,.f3 .p5,.f3 .p9,
+.f4 .p1,.f4 .p3,.f4 .p7,.f4 .p9,
+.f5 .p1,.f5 .p3,.f5 .p5,.f5 .p7,.f5 .p9,
+.f6 .p1,.f6 .p3,.f6 .p4,.f6 .p6,.f6 .p7,.f6 .p9
+{visibility:visible}
+</style>
+
+<section id="setup" class="screen">
+  <h1 class="brand">Mesa de <span>Dados</span></h1>
+  <p class="lead">¿Con cuántos dados quieres jugar?</p>
+  <div class="stepper">
+    <button id="minus" type="button" aria-label="Quitar un dado">−</button>
+    <div id="count" aria-live="polite">2</div>
+    <button id="plus" type="button" aria-label="Agregar un dado">+</button>
+  </div>
+  <div class="unit" id="unit">dados</div>
+  <div class="quick" id="quick"></div>
+  <button class="cta" id="start" type="button">Empezar</button>
+</section>
+
+<section id="table" class="screen" hidden>
+  <div class="bar">
+    <div class="bar-left">
+      <button class="chip" id="back" type="button">← Cantidad</button>
+      <button class="chip" id="sound" type="button" aria-pressed="true">Sonido: sí</button>
+    </div>
+    <div class="total"><small>Total</small><b id="sum">–</b></div>
+  </div>
+  <div id="board" role="button" tabindex="0" aria-label="Toca para tirar los dados"></div>
+  <p class="hint" id="hint">Toca la pantalla para tirar</p>
+</section>
+
+<script>
+(() => {
+  const MAX = 12;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const store = {
+    get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+    set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+  };
+  let n = parseInt(store.get('dados.n')); if (!(n >= 1 && n <= MAX)) n = 2;
+  let soundOn = store.get('dados.sound') !== '0';
+
+  const $ = id => document.getElementById(id);
+  const countEl = $('count'), unitEl = $('unit'), quick = $('quick');
+  const board = $('board'), sumEl = $('sum'), hint = $('hint'), soundBtn = $('sound');
+
+  /* ---------- Selector de cantidad ---------- */
+  [1,2,3,4,5,6].forEach(v => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = v; b.dataset.v = v;
+    b.onclick = () => setN(v);
+    quick.appendChild(b);
+  });
+  function setN(v){
+    n = Math.max(1, Math.min(MAX, v));
+    countEl.textContent = n;
+    unitEl.textContent = n === 1 ? 'dado' : 'dados';
+    $('minus').disabled = n <= 1; $('plus').disabled = n >= MAX;
+    quick.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === n));
+  }
+  $('minus').onclick = () => setN(n - 1);
+  $('plus').onclick = () => setN(n + 1);
+  setN(n);
+
+  /* ---------- Azar uniforme ---------- */
+  function rand6(){
+    const a = new Uint32Array(1);
+    do { crypto.getRandomValues(a); } while (a[0] >= 4294967292);
+    return (a[0] % 6) + 1;
+  }
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  /* Rotación que deja cada cara mirando al frente (1 frente, 6 atrás, 3 der, 4 izq, 2 arriba, 5 abajo) */
+  const FACE = {1:[0,0], 6:[0,180], 3:[0,-90], 4:[0,90], 2:[-90,0], 5:[90,0]};
+
+  /* ---------- Sonido sintetizado (golpes sobre la mesa) ---------- */
+  let ac = null;
+  function audio(){
+    if (!soundOn) return null;
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch(e){ return null; }
+    return ac;
+  }
+  function knock(when, strength){
+    const c = audio(); if (!c) return;
+    const len = Math.floor(c.sampleRate * 0.05);
+    const buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 4);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = rnd(1400, 2600); bp.Q.value = 1.2;
+    const g = c.createGain(); g.gain.value = 0.9 * strength;
+    src.connect(bp).connect(g).connect(c.destination);
+    src.start(c.currentTime + when);
+  }
+  function renderSound(){
+    soundBtn.textContent = 'Sonido: ' + (soundOn ? 'sí' : 'no');
+    soundBtn.setAttribute('aria-pressed', soundOn);
+  }
+  soundBtn.onclick = e => { e.stopPropagation(); soundOn = !soundOn; store.set('dados.sound', soundOn ? '1' : '0'); renderSound(); };
+  renderSound();
+
+  /* ---------- Construcción de dados ---------- */
+  function makeDie(){
+    const die = document.createElement('div'); die.className = 'die';
+    const shadow = document.createElement('div'); shadow.className = 'shadow';
+    const hop = document.createElement('div'); hop.className = 'hop';
+    const cube = document.createElement('div'); cube.className = 'cube instant';
+    for (let i = 1; i <= 6; i++){ const c = document.createElement('div'); c.className = 'core c' + i; cube.appendChild(c); }
+    for (let f = 1; f <= 6; f++){
+      const face = document.createElement('div'); face.className = 'face f' + f;
+      for (let i = 1; i <= 9; i++){ const p = document.createElement('i'); p.className = 'pip p' + i; face.appendChild(p); }
+      cube.appendChild(face);
+    }
+    hop.appendChild(cube); die.append(shadow, hop);
+    return { die, shadow, hop, cube, rx:0, ry:0, value:1 };
+  }
+
+  function setCube(d, value, spin){
+    const [tx, ty] = FACE[value];
+    if (spin){
+      // siempre avanza: varias vueltas completas + la orientación destino
+      d.rx = Math.ceil(d.rx / 360) * 360 + 360 * Math.floor(rnd(2, 4)) * (Math.random() < .5 ? 1 : -1);
+      d.ry = Math.ceil(d.ry / 360) * 360 + 360 * Math.floor(rnd(1, 3)) * (Math.random() < .5 ? 1 : -1);
+    } else { d.rx = 0; d.ry = 0; }
+    const tilt = rnd(-14, 14);                         // giro final natural sobre la mesa
+    d.cube.style.transform =
+      `rotateX(-9deg) rotateY(6deg) rotateZ(${tilt}deg) rotateX(${d.rx + tx}deg) rotateY(${d.ry + ty}deg)`;
+    d.value = value;
+  }
+
+  function sizeDice(){
+    const w = board.clientWidth, h = board.clientHeight;
+    let best = 40;
+    for (let cols = 1; cols <= n; cols++){
+      const rows = Math.ceil(n / cols), gap = 24;
+      const s = Math.min((w - gap*(cols-1)) / cols, (h - 30 - gap*(rows-1)) / rows);
+      if (s > best) best = s;
+    }
+    best = Math.floor(Math.min(best * .62, 130));
+    board.style.setProperty('--gap', Math.max(14, best * .28) + 'px');
+    dice.forEach(d => d.die.style.setProperty('--s', best + 'px'));
+  }
+
+  let dice = [], busy = false;
+  function buildBoard(){
+    board.innerHTML = '';
+    dice = Array.from({length:n}, () => {
+      const d = makeDie(); setCube(d, rand6(), false); board.appendChild(d.die); return d;
+    });
+    sumEl.textContent = '–';
+    sizeDice();
+    requestAnimationFrame(() => dice.forEach(d => d.cube.classList.remove('instant')));
+  }
+
+  /* ---------- Tirada ---------- */
+  const DUR = 1150;
+  function roll(){
+    if (busy) return;
+    busy = true;
+    sumEl.classList.add('pending');
+    try { navigator.vibrate && navigator.vibrate([18, 60, 12]); } catch(e){}
+    audio();
+
+    let total = 0, longest = 0;
+    dice.forEach(d => {
+      const v = rand6(); total += v;
+      const delay = rnd(0, 140);
+      longest = Math.max(longest, delay);
+      const H = parseFloat(getComputedStyle(d.die).getPropertyValue('--s')) * rnd(1.1, 1.6); // altura del lanzamiento
+      const dx = rnd(-0.6, 0.6) * H;
+
+      setTimeout(() => setCube(d, v, !reduce), delay);
+      if (reduce) return;
+
+      // salto parabólico con dos rebotes que pierden energía
+      d.hop.animate([
+        { transform:`translate3d(${dx}px,${-H*0.2}px,0)`,      easing:'cubic-bezier(.3,.6,.5,1)' },
+        { transform:`translate3d(${dx*.6}px,${-H}px,0)`,        offset:.2,  easing:'cubic-bezier(.5,0,.8,.4)' },
+        { transform:'translate3d(0,0,0) scale(1.04,.96)',       offset:.48, easing:'cubic-bezier(.3,.6,.5,1)' },
+        { transform:`translate3d(${-dx*.08}px,${-H*.22}px,0)`,  offset:.62, easing:'cubic-bezier(.5,0,.8,.4)' },
+        { transform:'translate3d(0,0,0) scale(1.02,.98)',       offset:.76, easing:'cubic-bezier(.3,.6,.5,1)' },
+        { transform:`translate3d(0,${-H*.05}px,0)`,             offset:.84, easing:'cubic-bezier(.5,0,.8,.4)' },
+        { transform:'translate3d(0,0,0)',                        offset:.92 },
+        { transform:'none' }
+      ], { duration: DUR, delay, fill:'none' });
+
+      // la sombra se achica y se aclara cuando el dado está en el aire
+      d.shadow.animate([
+        { transform:`translateX(${dx}px) scale(.7)`, opacity:.5 },
+        { transform:`translateX(${dx*.6}px) scale(.45)`, opacity:.25, offset:.2 },
+        { transform:'scale(1)', opacity:1, offset:.48 },
+        { transform:'scale(.8)', opacity:.7, offset:.62 },
+        { transform:'scale(1)', opacity:1, offset:.76 },
+        { transform:'scale(1)', opacity:1 }
+      ], { duration: DUR, delay, fill:'none' });
+
+      // golpes contra la mesa
+      const s = Math.min(1, 1.6 / Math.sqrt(n));
+      knock((delay + DUR*.48)/1000, s);
+      knock((delay + DUR*.76)/1000, s*.5);
+      knock((delay + DUR*.92)/1000, s*.22);
+    });
+
+    setTimeout(() => {
+      sumEl.textContent = total;
+      sumEl.classList.remove('pending');
+      hint.textContent = 'Toca para tirar otra vez';
+      busy = false;
+    }, reduce ? 50 : DUR + longest);
+  }
+
+  board.addEventListener('click', roll);
+  board.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); roll(); } });
+
+  $('start').onclick = () => {
+    store.set('dados.n', n);
+    $('setup').hidden = true; $('table').hidden = false;
+    hint.textContent = 'Toca la pantalla para tirar';
+    buildBoard();
+    board.focus({preventScroll:true});
+  };
+  $('back').onclick = e => { e.stopPropagation(); $('table').hidden = true; $('setup').hidden = false; };
+  addEventListener('resize', () => { if (!$('table').hidden) sizeDice(); });
+})();
+</script>
+</body></html>
