@@ -1,0 +1,9 @@
+torchaudio
+transformers>=4.44,<5
+gradio>=4.40
+soundfile
+imageio-ffmpeg
+numpy
+scipy
+sentencepiece
+accelerate
