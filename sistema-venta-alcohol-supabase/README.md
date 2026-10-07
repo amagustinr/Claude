@@ -101,7 +101,7 @@ npx wrangler pages dev dist      # abre http://localhost:8788
 2. En <https://dash.cloudflare.com> vaya a **Workers & Pages > Create > Pages > Connect to Git** y elija el repositorio.
 3. Configuración de compilación:
    - **Framework preset:** Vite (o *None*)
-   - **Root directory:** `web`
+   - **Root directory:** `web` (si el proyecto está dentro de una carpeta del repositorio, como en `amagustinr/Claude`, use `sistema-venta-alcohol-supabase/web`)
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
 4. En **Environment variables** agregue:
