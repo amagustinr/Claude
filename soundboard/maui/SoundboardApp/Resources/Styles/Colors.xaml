@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <Color x:Key="Chassis">#141519</Color>
+    <Color x:Key="Panel">#1E2026</Color>
+    <Color x:Key="Panel2">#272A31</Color>
+    <Color x:Key="Line">#34373F</Color>
+    <Color x:Key="Ink">#EBE7DE</Color>
+    <Color x:Key="Muted">#9A9CA5</Color>
+    <Color x:Key="Danger">#FF5A52</Color>
+    <!-- Requerido por la plantilla de MAUI -->
+    <Color x:Key="Primary">#EBE7DE</Color>
+</ResourceDictionary>
