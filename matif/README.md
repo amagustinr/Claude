@@ -10,7 +10,8 @@ Abre `index.html` en el navegador o publícalo en GitHub Pages o cualquier hosti
 
 - **Catálogo**: búsqueda y filtro de postres, con tarjetas adaptadas a celular (2 columnas), tablet y escritorio.
 - **Carrito**: se abre como panel inferior en celular, con bloqueo de scroll del fondo.
-- **Panel**: alta, edición y eliminación de productos.
+- **Panel** (con inicio de sesión): alta, edición, activación y eliminación de productos, y seguimiento de pedidos en tiempo real.
+- **Compartir**: enlace del catálogo o de un producto por WhatsApp.
 
 La página es responsive y se probó en 320, 375, 768 y 1280 px sin scroll horizontal.
 
