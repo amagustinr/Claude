@@ -1,0 +1,8 @@
+<resources>
+  <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+    <item name="android:windowBackground">@color/felt</item>
+    <item name="android:statusBarColor">@color/felt</item>
+    <item name="android:navigationBarColor">@color/felt</item>
+  </style>
+  <color name="felt">#0a2c21</color>
+</resources>
