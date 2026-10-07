@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#FF6B35"/>
+  <circle cx="256" cy="286" r="150" fill="#FFF8F0"/>
+  <path d="M300 118c40-38 96-40 118-34-6 30-40 74-104 76z" fill="#7BC950"/>
+  <text x="256" y="350" text-anchor="middle" font-family="Fredoka, Arial Rounded MT Bold, Arial, sans-serif" font-weight="700" font-size="200" fill="#E23E57">T</text>
+</svg>
