@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Panel LED</title>
+<style>
+  :root{
+    --bg:#0b0d12; --card:#151922; --card2:#1c2230; --line:#2a3242; --tx:#e8ecf3; --mut:#8b95a8;
+    --acc:#2f7bff; --acc2:#5aa0ff; --danger:#ff5a6a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--tx);font-family:Roboto,"Segoe UI",system-ui,sans-serif;font-size:15px}
+  body{padding:0 0 96px}
+  header{display:flex;align-items:center;gap:10px;padding:14px 16px 6px}
+  header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:.3px}
+  header .dot{width:10px;height:10px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+  .wrap{padding:8px 16px;display:flex;flex-direction:column;gap:14px}
+
+  .frame{background:linear-gradient(#3a3f47,#23272d);border-radius:10px;padding:8px;box-shadow:0 6px 20px #0008, inset 0 1px 0 #ffffff22}
+  .frame canvas{display:block;width:100%;height:112px;background:#050608;border-radius:4px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--mut);margin:0 0 10px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .card h2 b{color:var(--tx);font-size:14px;letter-spacing:0;text-transform:none}
+
+  textarea{width:100%;min-height:64px;resize:none;background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:17px;font-family:inherit;outline:none}
+  textarea:focus{border-color:var(--acc)}
+  .emojis{display:flex;gap:4px;overflow-x:auto;margin-top:8px;padding-bottom:4px;scrollbar-width:none}
+  .emojis::-webkit-scrollbar{display:none}
+  .emojis button{flex:0 0 auto;font-size:24px;background:var(--card2);border:1px solid var(--line);border-radius:10px;width:44px;height:44px;padding:0;line-height:1}
+
+  input[type=range]{width:100%;accent-color:var(--acc);height:28px}
+  .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .seg button{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 4px;font-size:13px;font-family:inherit}
+  .seg button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+  .seg button span{display:block;font-size:18px;margin-bottom:2px}
+
+  .colors{display:flex;flex-wrap:wrap;gap:10px}
+  .colors button{width:40px;height:40px;border-radius:50%;border:3px solid transparent;padding:0;box-shadow:0 0 0 1px var(--line)}
+  .colors button.on{border-color:#fff}
+
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .switch{position:relative;width:48px;height:28px;flex:0 0 auto}
+  .switch input{opacity:0;width:0;height:0}
+  .switch i{position:absolute;inset:0;background:var(--line);border-radius:20px;transition:.2s}
+  .switch i:before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}
+  .switch input:checked+i{background:var(--acc)}
+  .switch input:checked+i:before{transform:translateX(20px)}
+  .hint{color:var(--mut);font-size:12px;margin-top:4px}
+
+  .btn{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit}
+  .list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .item{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 6px 6px 12px}
+  .item .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+  .item .sw{width:12px;height:12px;border-radius:50%;flex:0 0 auto}
+  .item button{background:none;border:none;color:var(--tx);font-size:18px;width:38px;height:38px;border-radius:8px}
+  .item button.del{color:var(--danger)}
+  .empty{color:var(--mut);font-size:13px;text-align:center;padding:8px}
+
+  .play{position:fixed;left:16px;right:16px;bottom:16px;background:var(--acc);color:#fff;border:none;border-radius:14px;padding:16px;font-size:17px;font-weight:700;letter-spacing:.5px;box-shadow:0 8px 24px #2f7bff55;font-family:inherit}
+
+  /* Pantalla completa */
+  #show{position:fixed;inset:0;background:#000;display:none;z-index:10}
+  #show.on{display:block}
+  #show canvas{position:absolute;inset:0;width:100%;height:100%}
+  #hud{position:absolute;left:0;right:0;bottom:0;padding:14px;display:flex;gap:10px;align-items:center;background:linear-gradient(transparent,#000c);opacity:0;pointer-events:none;transition:opacity .25s}
+  #hud.on{opacity:1;pointer-events:auto}
+  #hud button{background:#ffffff22;color:#fff;border:1px solid #ffffff33;border-radius:10px;padding:10px 14px;font-size:15px;font-family:inherit}
+  #hud input{flex:1}
+  #hud .v{color:#fff;min-width:24px;text-align:center}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:20}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header><div class="dot" id="hdot"></div><h1>Panel LED</h1></header>
+
+<div class="wrap">
+  <div class="frame"><canvas id="preview"></canvas></div>
+
+  <div class="card">
+    <h2>Texto</h2>
+    <textarea id="txt" maxlength="300" placeholder="Escribe tu mensaje…"></textarea>
+    <div class="emojis" id="emojis"></div>
+  </div>
+
+  <div class="card">
+    <h2>Velocidad <b id="spdv">5</b></h2>
+    <input type="range" id="spd" min="1" max="10" step="1">
+  </div>
+
+  <div class="card">
+    <h2>Efecto</h2>
+    <div class="seg" id="mode">
+      <button data-v="left"><span>⬅️</span>Izquierda</button>
+      <button data-v="right"><span>➡️</span>Derecha</button>
+      <button data-v="fixed"><span>⏸️</span>Fijo</button>
+      <button data-v="blink"><span>✨</span>Parpadeo</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Color del LED</h2>
+    <div class="colors" id="colors"></div>
+  </div>
+
+  <div class="card">
+    <h2>Tamaño del LED</h2>
+    <div class="seg" id="size">
+      <button data-v="14"><span>⬤</span>Grueso</button>
+      <button data-v="20"><span>●</span>Medio</button>
+      <button data-v="28"><span>•</span>Fino</button>
+      <button data-v="40"><span>·</span>Muy fino</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div>Emojis a color<div class="hint">Apagado: los emojis salen del color del LED</div></div>
+      <label class="switch"><input type="checkbox" id="ecol"><i></i></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Mensajes guardados</h2>
+    <button class="btn" id="save">💾 Guardar mensaje actual</button>
+    <div class="list" id="list"></div>
+  </div>
+</div>
+
+<button class="play" id="play">▶ MOSTRAR EN PANTALLA</button>
+
+<div id="show">
+  <canvas id="big"></canvas>
+  <div id="hud">
+    <button id="exit">✕ Salir</button>
+    <span style="color:#fff">🐢</span>
+    <input type="range" id="spd2" min="1" max="10" step="1">
+    <span style="color:#fff">🐇</span>
+    <span class="v" id="spd2v">5</span>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+const $ = s => document.querySelector(s);
+const hasAndroid = typeof window.Android !== 'undefined';
+
+const COLORS = [
+  {id:'blue',   c:'#2f8bff'}, {id:'red',  c:'#ff2a2a'}, {id:'green', c:'#22ff4e'},
+  {id:'amber',  c:'#ffb000'}, {id:'white',c:'#f4f8ff'}, {id:'cyan',  c:'#1ee8ff'},
+  {id:'pink',   c:'#ff3fb4'}, {id:'violet',c:'#9a5bff'}, {id:'rainbow', c:'rainbow'}
+];
+const EMOJIS = '❤️ 😀 😂 😍 😎 🥳 🔥 ⭐ ✨ 🎉 🎁 👍 👉 🙏 💯 ⚡ 🚀 ✅ ❌ ⚠️ 📢 💰 🛒 🍔 🍕 ☕ 🍺 🎶 ⚽ 🏆 🇵🇪 🎂 🌟 💙 💚 💛'.split(' ');
+
+const DEF = {text:'¡HOLA! 👋 Bienvenidos 🎉', speed:5, mode:'left', color:'blue', rows:20, emojiColor:true};
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function store(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+let cfg = Object.assign({}, DEF, load('led_cfg', {}));
+let saved = load('led_saved', []);
+
+/* ---------------- Motor del panel LED ---------------- */
+function hexRgb(h){ const n = parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function hsl(h){ return 'hsl('+h+',100%,58%)'; }
+
+class Panel{
+  constructor(canvas, opts){
+    this.cv = canvas; this.ctx = canvas.getContext('2d');
+    this.bg = document.createElement('canvas');
+    this.full = !!(opts && opts.full);
+    this.t0 = performance.now();
+  }
+  isStatic(){ return this.c.mode === 'fixed' || this.c.mode === 'blink'; }
+  setCfg(c){
+    const textChanged = !this.c || c.text !== this.c.text || c.rows !== this.c.rows || c.mode !== this.c.mode;
+    const layoutChanged = !this.c || c.rows !== this.c.rows || c.color !== this.c.color;
+    this.c = Object.assign({}, c);
+    if (layoutChanged) this.resize(true);
+    else if (textChanged) this.buildText();
+  }
+  // Dibuja un texto en un bitmap de R filas y lo convierte a LEDs
+  bitmap(txt, fs, baseY){
+    const R = this.c.rows, font = '900 '+fs+this.FAM;
+    const m = document.createElement('canvas').getContext('2d'); m.font = font;
+    const W = Math.max(1, Math.ceil(m.measureText(txt).width) + 2);
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = R;
+    const x = cv.getContext('2d', {willReadFrequently:true});
+    x.font = font; x.fillStyle = '#fff'; x.textBaseline = 'alphabetic';
+    x.fillText(txt, 1, Math.round(baseY));
+    const d = x.getImageData(0,0,W,R).data;
+    // lit: 0 apagado, 1 color LED, 2 color propio (emoji)
+    const lit = new Uint8Array(W*R), col = new Array(W*R);
+    for (let i=0;i<W*R;i++){
+      const r=d[i*4], g=d[i*4+1], b=d[i*4+2], a=d[i*4+3]/255;
+      if (a < 0.45) continue;
+      const mx = Math.max(r,g,b), mn = Math.min(r,g,b);
+      const lum = (0.3*r+0.59*g+0.11*b)/255;
+      if (mx - mn > 45){ // pixel de color (emoji)
+        if (mx < 55) continue;
+        lit[i] = 2;
+        const k = 255/mx; // resaltar brillo como LED
+        col[i] = 'rgb('+Math.round(r*k)+','+Math.round(g*k)+','+Math.round(b*k)+')';
+        col[i+'m'] = lum > 0.28;
+      } else if (lum > 0.32){
+        lit[i] = 1;
+      }
+    }
+    return {W, lit, col};
+  }
+  // Tamaño de fuente para un texto: llena la altura y, si se pide, se achica para entrar en maxW columnas
+  fit(txt, maxW){
+    const R = this.c.rows;
+    const m = document.createElement('canvas').getContext('2d');
+    m.font = '900 100'+this.FAM;
+    const mt = m.measureText(txt);
+    const asc = mt.actualBoundingBoxAscent || 72, des = mt.actualBoundingBoxDescent || 0;
+    let fs = Math.max(6, Math.floor(100 * (R*0.94) / Math.max(60, asc + des)));
+    if (maxW){ const w100 = mt.width + 2; fs = Math.min(fs, Math.floor(100 * (maxW - 1) / w100)); }
+    fs = Math.max(5, fs);
+    const k = fs/100;
+    return {fs, baseY: (R - (asc+des)*k)/2 + asc*k, w: Math.ceil(mt.width*k) + 2};
+  }
+  buildText(){
+    this.FAM = 'px Roboto, "Arial Black", Arial, sans-serif';
+    const txt = (this.c.text || ' ').replace(/\s*\n\s*/g,'   ');
+    if (!this.isStatic() || !this.cols){
+      const f = this.fit(txt, 0);
+      const bm = this.bitmap(txt, f.fs, f.baseY);
+      this.W = bm.W; this.lit = bm.lit; this.col = bm.col; this.pages = null;
+      return;
+    }
+    // Modo estático: el texto NO se mueve. Si no entra, se achica; si aun así no entra, se divide en páginas.
+    const cols = this.cols, full = this.fit(txt, 0), fitted = this.fit(txt, cols);
+    let groups;
+    if (full.w <= cols || fitted.fs >= full.fs * 0.6) groups = [txt.trim() || ' '];
+    else {
+      groups = []; let cur = '';
+      for (const w of txt.split(/\s+/).filter(Boolean)){
+        const tryS = cur ? cur + ' ' + w : w;
+        if (!cur || this.fit(tryS, 0).w <= cols) cur = tryS;
+        else { groups.push(cur); cur = w; }
+      }
+      if (cur) groups.push(cur);
+    }
+    this.pages = groups.map(g => { const f = this.fit(g, cols); return this.bitmap(g, f.fs, f.baseY); });
+  }
+  resize(force){
+    if (!this.c) return;
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.round(this.cv.clientWidth * dpr), h = Math.round(this.cv.clientHeight * dpr);
+    if (!w || !h) return;
+    if (!force && w === this.cv.width && h === this.cv.height) return;
+    this.cv.width = w; this.cv.height = h;
+    const R = this.c.rows;
+    const cell = h / R;
+    this.cell = cell;
+    this.cols = Math.max(1, Math.floor(w / cell));
+    this.ox = (w - this.cols*cell)/2;
+    this.buildText();
+    // capa de LEDs apagados
+    this.bg.width = w; this.bg.height = h;
+    const b = this.bg.getContext('2d');
+    b.fillStyle = '#050608'; b.fillRect(0,0,w,h);
+    const base = this.c.color === 'rainbow' ? '#ffffff' : COLORS.find(x=>x.id===this.c.color).c;
+    const [r,g,bb] = hexRgb(base);
+    b.fillStyle = 'rgba('+Math.round(r*0.16+14)+','+Math.round(g*0.16+14)+','+Math.round(bb*0.16+16)+',1)';
+    const rad = cell*0.36;
+    b.beginPath();
+    for (let y=0;y<R;y++) for (let x=0;x<this.cols;x++){
+      const cx = this.ox + x*cell + cell/2, cy = y*cell + cell/2;
+      b.moveTo(cx+rad, cy); b.arc(cx, cy, rad, 0, 6.2832);
+    }
+    b.fill();
+  }
+  draw(now){
+    if (!this.c) return;
+    this.resize(false);
+    if (!this.cols || (!this.pages && !this.lit)) return;
+    const ctx = this.ctx, c = this.c, R = c.rows, cols = this.cols, cell = this.cell;
+    ctx.drawImage(this.bg, 0, 0);
+    const t = (now - this.t0)/1000;
+    let pos, visible = true, W, lit, colr;
+    if (this.pages){
+      // Fijo / Parpadeo: texto quieto y centrado; si hay varias páginas, cambia cada cierto tiempo
+      const hold = 5.5 - c.speed*0.45;
+      const pg = this.pages[Math.floor(t / hold) % this.pages.length];
+      W = pg.W; lit = pg.lit; colr = pg.col;
+      pos = Math.floor((cols - W)/2);
+      if (c.mode === 'blink'){ const per = 1.6 - c.speed*0.13; visible = (t % per) < per*0.62; }
+    } else {
+      W = this.W; lit = this.lit; colr = this.col;
+      const cps = R * (0.1 + 0.15*c.speed);          // columnas por segundo
+      const cycle = cols + W;
+      if (c.mode === 'right') pos = -W + (Math.floor(t*cps) % cycle);
+      else pos = cols - (Math.floor(t*cps) % cycle);
+    }
+    if (!visible) return;
+    const rainbow = c.color === 'rainbow';
+    const base = rainbow ? null : COLORS.find(x=>x.id===c.color).c;
+    const groups = new Map();
+    const add = (key, cx, cy) => { let g = groups.get(key); if(!g){ g=[]; groups.set(key,g);} g.push(cx,cy); };
+    const x0 = Math.max(0, pos), x1 = Math.min(cols, pos + W);
+    for (let x=x0; x<x1; x++){
+      const tx = x - pos;
+      const cx = this.ox + x*cell + cell/2;
+      const rb = rainbow ? hsl(Math.round(((x*6 + t*90) % 360)/10)*10) : null;
+      for (let y=0; y<R; y++){
+        const i = y*W + tx, v = lit[i];
+        if (!v) continue;
+        const cy = y*cell + cell/2;
+        if (v === 2){
+          if (c.emojiColor) add(colr[i], cx, cy);
+          else if (colr[i+'m']) add(rb || base, cx, cy);
+        } else add(rb || base, cx, cy);
+      }
+    }
+    const rGlow = cell*0.62, rCore = cell*0.40, rHi = cell*0.17;
+    groups.forEach((pts, color) => {
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.22; this.dots(pts, rGlow);
+      ctx.globalAlpha = 1;    this.dots(pts, rCore);
+    });
+    ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.45;
+    groups.forEach(pts => this.dots(pts, rHi));
+    ctx.globalAlpha = 1;
+  }
+  dots(p, r){
+    const ctx = this.ctx; ctx.beginPath();
+    for (let k=0;k<p.length;k+=2){ ctx.moveTo(p[k]+r, p[k+1]); ctx.arc(p[k], p[k+1], r, 0, 6.2832); }
+    ctx.fill();
+  }
+}
+
+/* ---------------- Interfaz ---------------- */
+const prev = new Panel($('#preview'));
+const big = new Panel($('#big'), {full:true});
+let showing = false;
+
+function apply(){
+  store('led_cfg', cfg);
+  prev.setCfg(cfg);
+  if (showing) big.setCfg(cfg);
+  $('#spd').value = cfg.speed; $('#spdv').textContent = cfg.speed;
+  $('#spd2').value = cfg.speed; $('#spd2v').textContent = cfg.speed;
+  document.querySelectorAll('#mode button').forEach(b => b.classList.toggle('on', b.dataset.v === cfg.mode));
+  document.querySelectorAll('#size button').forEach(b => b.classList.toggle('on', +b.dataset.v === cfg.rows));
+  document.querySelectorAll('#colors button').forEach(b => b.classList.toggle('on', b.dataset.v === cfg.color));
+  $('#ecol').checked = !!cfg.emojiColor;
+  const hc = cfg.color === 'rainbow' ? '#ff3fb4' : COLORS.find(x=>x.id===cfg.color).c;
+  $('#hdot').style.background = hc; $('#hdot').style.boxShadow = '0 0 10px '+hc;
+}
+
+$('#txt').value = cfg.text;
+$('#txt').addEventListener('input', e => { cfg.text = e.target.value; apply(); });
+
+const em = $('#emojis');
+EMOJIS.forEach(e => {
+  const b = document.createElement('button'); b.textContent = e;
+  b.onclick = () => {
+    const ta = $('#txt'), s = ta.selectionStart ?? ta.value.length, en = ta.selectionEnd ?? s;
+    ta.value = ta.value.slice(0,s) + e + ta.value.slice(en);
+    const p = s + e.length; ta.setSelectionRange(p,p);
+    cfg.text = ta.value; apply();
+  };
+  em.appendChild(b);
+});
+
+const cw = $('#colors');
+COLORS.forEach(o => {
+  const b = document.createElement('button'); b.dataset.v = o.id;
+  b.style.background = o.c === 'rainbow' ? 'conic-gradient(red,orange,yellow,lime,cyan,blue,magenta,red)' : o.c;
+  b.onclick = () => { cfg.color = o.id; apply(); };
+  cw.appendChild(b);
+});
+
+$('#spd').addEventListener('input', e => { cfg.speed = +e.target.value; apply(); });
+$('#spd2').addEventListener('input', e => { cfg.speed = +e.target.value; apply(); pokeHud(); });
+document.querySelectorAll('#mode button').forEach(b => b.onclick = () => { cfg.mode = b.dataset.v; apply(); });
+document.querySelectorAll('#size button').forEach(b => b.onclick = () => { cfg.rows = +b.dataset.v; apply(); });
+$('#ecol').addEventListener('change', e => { cfg.emojiColor = e.target.checked; apply(); });
+
+/* Mensajes guardados */
+function renderList(){
+  const l = $('#list'); l.innerHTML = '';
+  if (!saved.length){ l.innerHTML = '<div class="empty">Aún no tienes mensajes guardados</div>'; return; }
+  saved.forEach((m, i) => {
+    const d = document.createElement('div'); d.className = 'item';
+    const col = m.color === 'rainbow' ? 'conic-gradient(red,yellow,lime,cyan,blue,magenta,red)' : COLORS.find(x=>x.id===m.color).c;
+    d.innerHTML = '<span class="sw"></span><span class="t"></span><button title="Mostrar">▶</button><button class="del" title="Borrar">🗑</button>';
+    d.querySelector('.sw').style.background = col;
+    d.querySelector('.t').textContent = m.text || '(vacío)';
+    d.querySelector('.t').onclick = () => { loadMsg(m); toast('Mensaje cargado'); };
+    d.querySelectorAll('button')[0].onclick = () => { loadMsg(m); openShow(); };
+    d.querySelectorAll('button')[1].onclick = () => { saved.splice(i,1); store('led_saved', saved); renderList(); toast('Mensaje borrado'); };
+    l.appendChild(d);
+  });
+}
+function loadMsg(m){ cfg = Object.assign({}, DEF, m); $('#txt').value = cfg.text; apply(); window.scrollTo({top:0,behavior:'smooth'}); }
+$('#save').onclick = () => {
+  if (!cfg.text.trim()){ toast('Escribe un texto primero'); return; }
+  saved = saved.filter(m => m.text !== cfg.text);
+  saved.unshift(Object.assign({}, cfg));
+  store('led_saved', saved); renderList(); toast('💾 Mensaje guardado');
+};
+
+let tt; function toast(s){ const t = $('#toast'); t.textContent = s; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove('on'), 1600); }
+
+/* Pantalla completa */
+let hudT;
+function pokeHud(){ $('#hud').classList.add('on'); clearTimeout(hudT); hudT = setTimeout(()=>$('#hud').classList.remove('on'), 3000); }
+function openShow(){
+  if (!cfg.text.trim()){ toast('Escribe un texto primero'); return; }
+  document.activeElement && document.activeElement.blur();
+  showing = true; $('#show').classList.add('on');
+  if (hasAndroid){ try{ Android.display(true); }catch(e){} }
+  else {
+    const el = document.documentElement;
+    (el.requestFullscreen ? el.requestFullscreen() : Promise.resolve()).then(()=>{
+      try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
+    }).catch(()=>{});
+  }
+  big.c = null; big.t0 = performance.now();
+  setTimeout(()=>{ big.setCfg(cfg); }, 60);
+  setTimeout(()=>{ big.resize(true); }, 450);
+  pokeHud();
+}
+function closeShow(){
+  showing = false; $('#show').classList.remove('on'); $('#hud').classList.remove('on');
+  if (hasAndroid){ try{ Android.display(false); }catch(e){} }
+  else if (document.fullscreenElement){ document.exitFullscreen().catch(()=>{}); }
+  setTimeout(()=>prev.resize(true), 400);
+}
+$('#play').onclick = openShow;
+$('#exit').onclick = e => { e.stopPropagation(); closeShow(); };
+$('#big').addEventListener('click', pokeHud);
+window.__back = function(){ if (showing){ closeShow(); return true; } return false; };
+window.addEventListener('resize', () => { prev.resize(true); if (showing) big.resize(true); });
+
+function loop(now){
+  prev.draw(now);
+  if (showing && big.c) big.draw(now);
+  requestAnimationFrame(loop);
+}
+apply(); renderList();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
