@@ -1,0 +1,7 @@
+# IMPORTANTE: instala torch/torchaudio con CUDA ANTES que esto (lo hace instalar.bat).
+coqui-tts>=0.27
+openai-whisper
+gradio>=5.0
+librosa>=0.11
+soundfile
+numpy

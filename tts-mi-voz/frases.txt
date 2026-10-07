@@ -1,0 +1,42 @@
+# Frases para grabar tu dataset. Una por línea; las que empiezan con # se ignoran.
+# Puedes agregar tus propias frases (las que más vayas a usar suenan mejor si las grabas).
+Hola, esta es una prueba de mi voz para crear un sistema de texto a voz.
+El cielo de Lima amaneció gris, pero por la tarde salió un poco el sol.
+¿Me puedes enviar el reporte de ventas antes de las cinco de la tarde?
+¡Qué buena noticia! Por fin terminamos la migración del sistema.
+La reunión se movió para el jueves a las diez y media de la mañana.
+Necesito revisar la base de datos porque algunos registros están duplicados.
+El paquete llegó ayer, pero la guía de remisión tenía un error en la dirección.
+Cuando termines de almacenar los archivos, avísame para hacer la copia de seguridad.
+Mi número favorito es el veintisiete, aunque no sé muy bien por qué.
+¿Ya actualizaste el servidor o todavía falta reiniciarlo?
+La tecnología avanza rápido, y hay que aprender algo nuevo cada semana.
+Por favor, cierra la puerta y apaga las luces al salir.
+El chofer confirmó que el camión saldrá mañana temprano hacia Arequipa.
+Ojalá que el próximo fin de semana podamos ir a la playa con la familia.
+Esa canción me recuerda a mis años en la universidad.
+¡Cuidado! El piso está mojado y alguien se puede resbalar.
+Hoy aprendí que la paciencia es la mejor herramienta de un programador.
+El precio incluye el impuesto general a las ventas y el costo de envío.
+¿Cuántas personas confirmaron su asistencia para el evento del viernes?
+Julio y Gabriela jugaron ajedrez hasta muy tarde en la noche.
+El zorro saltó rápidamente sobre el perro que dormía junto al árbol.
+Vamos a comprar pan, queso, leche y un poco de fruta para el desayuno.
+Si el sistema muestra un error, toma una captura de pantalla y envíamela.
+Me quedé sin batería justo cuando iba a hacer una llamada importante.
+Gracias por tu ayuda, de verdad me salvaste el día.
+La lluvia en la sierra dificultó el paso de los vehículos por la carretera.
+¿Sabías que el Perú tiene una enorme variedad de papas y maíces?
+Primero instalamos las dependencias, luego configuramos el entorno y al final probamos.
+No te preocupes, lo resolvemos mañana con más calma.
+Él dijo que vendría a las ocho, pero llegó casi a las nueve y cuarto.
+El certificado venció la semana pasada y hay que renovarlo cuanto antes.
+Mi abuela cocinaba el mejor ají de gallina que he probado en mi vida.
+Hace frío, así que llevaré una chompa y una bufanda.
+¿Quieres café o prefieres una infusión de manzanilla?
+Aprobaron el proyecto, así que empezamos el lunes sin falta.
+Los niños corrieron por el parque persiguiendo una pelota amarilla.
+Recuerda guardar los cambios antes de cerrar el programa.
+El volumen está muy alto; bájalo un poco, por favor.
+Increíble, nunca pensé que funcionaría a la primera.
+Buenas tardes, le saluda Alexander. ¿En qué le puedo ayudar?
