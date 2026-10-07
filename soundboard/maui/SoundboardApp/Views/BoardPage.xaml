@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SoundboardApp.ViewModels"
+             x:Class="SoundboardApp.Views.BoardPage"
+             x:DataType="vm:BoardViewModel"
+             Title="Tablero">
+
+    <Grid RowDefinitions="Auto,*" Padding="16,12,16,0" RowSpacing="12">
+
+        <!-- Cabecera -->
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                <Label Text="SOUNDBOARD" FontSize="20" FontAttributes="Bold" CharacterSpacing="3" VerticalOptions="Center" />
+                <Label Text="{Binding CountText}" FontSize="11" TextColor="{StaticResource Muted}" CharacterSpacing="1.5" VerticalOptions="Center" />
+            </HorizontalStackLayout>
+            <Button Grid.Column="1" Text="■  Detener todo" Command="{Binding StopAllCommand}"
+                    BorderColor="#7A3936" TextColor="#FFD0CC" />
+        </Grid>
+
+        <!-- Rejilla de pads -->
+        <CollectionView Grid.Row="1" SizeChanged="OnGridSizeChanged" ItemsSource="{Binding Pads}" SelectionMode="None">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="{Binding Columns}" HorizontalItemSpacing="10" VerticalItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.EmptyView>
+                <Border Style="{StaticResource Card}" StrokeDashArray="4,3" Padding="24" Margin="0,8">
+                    <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                        <Label Text="Tu tablero está vacío" FontSize="18" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Text="Sube tus audios en Configurar y aparecerán aquí como pads." TextColor="{StaticResource Muted}" HorizontalTextAlignment="Center" />
+                        <Button Text="Ir a Configurar" Style="{StaticResource PrimaryButton}" Command="{Binding GoToConfigCommand}" HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Border>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:PadViewModel">
+                    <Border x:Name="Pad"
+                            BackgroundColor="{Binding Background}"
+                            Stroke="{Binding BorderColor}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 16"
+                            Padding="0"
+                            HeightRequest="{Binding PadSize, Source={RelativeSource AncestorType={x:Type vm:BoardViewModel}}, x:DataType=vm:BoardViewModel}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnPadTapped" />
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="Auto,*,4" Padding="0">
+                            <Grid ColumnDefinitions="*,Auto" Padding="10,10,10,0">
+                                <Label Text="{Binding Label}" FontSize="11" CharacterSpacing="1.5" TextColor="{Binding PadColor}" />
+                                <Ellipse Grid.Column="1" WidthRequest="10" HeightRequest="10" Fill="{Binding LedColor}" VerticalOptions="Center" />
+                            </Grid>
+                            <Label Grid.Row="1" Text="{Binding Name}" FontSize="16" FontAttributes="Bold"
+                                   LineBreakMode="WordWrap" MaxLines="3" VerticalOptions="End" Margin="10,0,10,8" />
+                            <ProgressBar Grid.Row="2" Progress="{Binding Progress}" ProgressColor="{Binding PadColor}"
+                                         BackgroundColor="Transparent" IsVisible="{Binding IsPlaying}" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

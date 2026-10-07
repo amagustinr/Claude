@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:SoundboardApp.ViewModels"
+             x:Class="SoundboardApp.Views.ConfigPage"
+             x:DataType="vm:ConfigViewModel"
+             Title="Configurar">
+
+    <CollectionView ItemsSource="{Binding Items}" SelectionMode="None" Margin="16,0">
+        <CollectionView.ItemsLayout>
+            <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+        </CollectionView.ItemsLayout>
+
+        <!-- Cabecera: subir audios y ajustes del tablero -->
+        <CollectionView.Header>
+            <VerticalStackLayout Padding="0,12,0,10">
+                <Label Text="CONFIGURAR" FontSize="20" FontAttributes="Bold" CharacterSpacing="3" />
+
+                <Label Text="Añadir audios" Style="{StaticResource SectionTitle}" />
+                <Border Style="{StaticResource Card}" StrokeDashArray="4,3" Padding="18">
+                    <VerticalStackLayout Spacing="8">
+                        <Button Text="Elegir audios" Style="{StaticResource PrimaryButton}" Command="{Binding AddSoundsCommand}" HorizontalOptions="Center" />
+                        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Ink}" HeightRequest="24" />
+                        <Label Text="MP3, M4A, WAV, OGG… Puedes elegir varios a la vez." TextColor="{StaticResource Muted}" FontSize="13" HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Tablero" Style="{StaticResource SectionTitle}" />
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Columnas" VerticalOptions="Center" />
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6">
+                                <Button Text="2" Command="{Binding SetColumnsCommand}" CommandParameter="2" WidthRequest="44">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is2}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource Ink}" />
+                                            <Setter Property="TextColor" Value="{StaticResource Chassis}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="3" Command="{Binding SetColumnsCommand}" CommandParameter="3" WidthRequest="44">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is3}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource Ink}" />
+                                            <Setter Property="TextColor" Value="{StaticResource Chassis}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button Text="4" Command="{Binding SetColumnsCommand}" CommandParameter="4" WidthRequest="44">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding Is4}" Value="True">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource Ink}" />
+                                            <Setter Property="TextColor" Value="{StaticResource Chassis}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </HorizontalStackLayout>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Label Text="Al tocar un pad que suena" VerticalOptions="Center" />
+                            <Picker Grid.Column="1" ItemsSource="{Binding TapModes}" SelectedIndex="{Binding TapModeIndex}" WidthRequest="130" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="{Binding ListTitle}" Style="{StaticResource SectionTitle}" />
+            </VerticalStackLayout>
+        </CollectionView.Header>
+
+        <CollectionView.EmptyView>
+            <Label Text="Aún no hay sonidos. Sube tu primer audio arriba." TextColor="{StaticResource Muted}" HorizontalTextAlignment="Center" Margin="0,20" />
+        </CollectionView.EmptyView>
+
+        <!-- Una tarjeta por sonido -->
+        <CollectionView.ItemTemplate>
+            <DataTemplate x:DataType="vm:SoundItemViewModel">
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Button Text="▶" WidthRequest="48" HeightRequest="48" Padding="0" FontSize="16"
+                                    BackgroundColor="{Binding PadColor}" TextColor="#141519" BorderWidth="0"
+                                    Command="{Binding PreviewCommand}" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Entry Text="{Binding Name}" MaxLength="40" Placeholder="Nombre del sonido" />
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="{Binding Info}" FontSize="12" TextColor="{StaticResource Muted}" />
+                                    <Label Text="EJEMPLO" FontSize="10" CharacterSpacing="1.5" TextColor="{StaticResource Muted}" IsVisible="{Binding IsExample}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Swatches}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SwatchViewModel">
+                                    <Grid WidthRequest="30" HeightRequest="30">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectCommand}" />
+                                        </Grid.GestureRecognizers>
+                                        <Ellipse Fill="{Binding Color}" />
+                                        <Ellipse Stroke="{StaticResource Ink}" StrokeThickness="2.5" IsVisible="{Binding IsSelected}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="8">
+                            <Label Text="Vol" TextColor="{StaticResource Muted}" FontSize="13" VerticalOptions="Center" />
+                            <Slider Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Volume}" MinimumTrackColor="{Binding PadColor}" ThumbColor="{Binding PadColor}" VerticalOptions="Center" />
+                            <Button Grid.Column="2" Text="▲" WidthRequest="40" Padding="0" IsEnabled="{Binding CanMoveUp}" Command="{Binding MoveUpCommand}" />
+                            <Button Grid.Column="3" Text="▼" WidthRequest="40" Padding="0" IsEnabled="{Binding CanMoveDown}" Command="{Binding MoveDownCommand}" />
+                            <Button Grid.Column="4" Text="Borrar" TextColor="{StaticResource Danger}" Command="{Binding DeleteCommand}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+
+        <CollectionView.Footer>
+            <Label Text="Los audios se copian a la memoria privada de la app. Si la desinstalas, se borran."
+                   TextColor="{StaticResource Muted}" FontSize="13" Margin="0,12,0,24" />
+        </CollectionView.Footer>
+    </CollectionView>
+</ContentPage>
