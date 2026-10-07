@@ -1,0 +1,18 @@
+body { background: #f5f6f8; }
+.navbar-brand i { color: #f3c969; }
+.tarjeta-indicador .valor { font-size: 1.6rem; font-weight: 600; }
+.table td, .table th { vertical-align: middle; }
+.stock-bajo { color: #b02a37; font-weight: 600; }
+
+/* Documento (boleta / factura) */
+.documento { max-width: 760px; margin: 0 auto; padding: 1.5rem; background: #fff; }
+.documento.boleta { max-width: 380px; font-size: .92rem; }
+.recuadro-sii { border: 3px solid #b02a37; color: #b02a37; text-align: center; font-weight: 700; padding: .5rem; }
+.anulada-sello { border: 3px solid #b02a37; color: #b02a37; font-weight: 700; font-size: 1.4rem; padding: .1rem 1rem; transform: rotate(-6deg); display: inline-block; }
+
+@media print {
+  .no-print, nav.navbar { display: none !important; }
+  body { background: #fff; }
+  main.container { max-width: none; padding: 0; }
+  .documento { border: none !important; box-shadow: none !important; }
+}

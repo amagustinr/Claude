@@ -1,0 +1,6 @@
+# Solo para probar /api/usuarios en local con "npx wrangler pages dev".
+# Copie como .dev.vars. NUNCA suba este archivo a git.
+VITE_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+VITE_DOMINIO_USUARIOS=botilleria.local
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
