@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <!-- Permite compilar los proyectos WinForms también fuera de Windows (CI) -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <!-- PDFtoImage marca APIs por plataforma; la app solo se ejecuta en Windows -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+</Project>

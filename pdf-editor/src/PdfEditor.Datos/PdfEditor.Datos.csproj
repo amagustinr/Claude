@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>PdfEditor.Datos</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Edición/creación de PDF (licencia MIT) -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <!-- Renderizado de páginas con PDFium de Google (licencia MIT) -->
+    <PackageReference Include="PDFtoImage" Version="5.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PdfEditor.Entidades\PdfEditor.Entidades.csproj" />
+  </ItemGroup>
+</Project>

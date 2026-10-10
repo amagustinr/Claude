@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>PdfEditor.Negocio</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PdfEditor.Entidades\PdfEditor.Entidades.csproj" />
+    <ProjectReference Include="..\PdfEditor.Datos\PdfEditor.Datos.csproj" />
+  </ItemGroup>
+</Project>
