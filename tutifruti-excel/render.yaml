@@ -1,0 +1,10 @@
+# Blueprint de Render. Opcional: tambien se puede crear el servicio a mano (ver README).
+services:
+  - type: web
+    name: catalogo-maestro
+    runtime: node
+    plan: free
+    rootDir: tutifruti-excel
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/salud
