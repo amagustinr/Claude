@@ -15,14 +15,14 @@ const PORT = process.env.PORT || 3000;
 // ---------------------------------------------------------------
 
 const CAMPOS = [
-  { id: 'responsable',  label: 'Responsable asignado' },
-  { id: 'apellido',     label: 'Apellido del responsable' },
-  { id: 'razonSocial',  label: 'Razon social del proveedor' },
-  { id: 'cromatico',    label: 'Atributo cromatico' },
-  { id: 'perecible',    label: 'Insumo perecible' },
-  { id: 'semoviente',   label: 'Bien semoviente' },
-  { id: 'origen',       label: 'Origen / pais de procedencia' },
-  { id: 'descripcion',  label: 'Descripcion del bien' }
+  { id: 'responsable',  label: 'Responsable asignado - Nombre' },
+  { id: 'apellido',     label: 'Apellido del responsable - Apellido' },
+  { id: 'razonSocial',  label: 'Razon social del proveedor - Animal' },
+  { id: 'cromatico',    label: 'Atributo cromatico - Color' },
+  { id: 'perecible',    label: 'Insumo perecible - Fruta' },
+  { id: 'semoviente',   label: 'Bien semoviente - Objeto/Cosa' },
+  { id: 'origen',       label: 'Origen / pais de procedencia - Deporte' },
+  { id: 'descripcion',  label: 'Descripcion del bien - Pelicula' }
 ];
 
 // Sin K, Q, W, X, Y, Z: en espanol dan rondas frustrantes.
