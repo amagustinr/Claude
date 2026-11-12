@@ -1,0 +1,13 @@
+{
+  "name": "Tutifruti",
+  "short_name": "Tutifruti",
+  "description": "Tutifruti multijugador para jugar con amigos desde el celular",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff4e8",
+  "theme_color": "#ff5a36",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

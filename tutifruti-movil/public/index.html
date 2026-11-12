@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#ff5a36">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Tutifruti</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff4e8;
+    --bg2: #ffe3cc;
+    --card: #ffffff;
+    --ink: #2b1a12;
+    --muted: #8a6e60;
+    --line: #f1dccb;
+    --primary: #ff5a36;
+    --primary-ink: #ffffff;
+    --green: #1fae6b;
+    --green-bg: #dcf6e8;
+    --red: #e23d4b;
+    --red-bg: #fde2e4;
+    --amber: #f6a21a;
+    --amber-bg: #fff0d4;
+    --violet: #7b4dff;
+    --shadow: 0 6px 18px rgba(120, 60, 20, .12);
+    --radius: 18px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1310;
+      --bg2: #2a1c16;
+      --card: #2c201b;
+      --ink: #fbeee6;
+      --muted: #b89c8f;
+      --line: #43312a;
+      --green-bg: #173a29;
+      --red-bg: #45202a;
+      --amber-bg: #44321a;
+      --shadow: 0 6px 18px rgba(0, 0, 0, .35);
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    background: radial-gradient(120% 60% at 50% 0%, var(--bg2), var(--bg) 70%) fixed, var(--bg);
+    overscroll-behavior: none;
+  }
+  h1, h2, h3, .display { font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; margin: 0; line-height: 1.1; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+  input { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+
+  .app {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    padding: calc(var(--safe-t) + 14px) 16px calc(var(--safe-b) + 110px);
+  }
+
+  /* ------- piezas comunes ------- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%;
+    min-height: 54px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 1.08rem;
+    background: var(--primary);
+    color: var(--primary-ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,.18);
+    transition: transform .08s, opacity .2s, background .2s;
+  }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+  .btn:disabled { opacity: .45; pointer-events: none; }
+  .btn.sec { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 2px var(--line), 0 3px 0 rgba(0,0,0,.08); }
+  .btn.ok { background: var(--green); }
+  .btn.small { min-height: 40px; font-size: .95rem; padding: 8px 14px; width: auto; border-radius: 12px; }
+  .field {
+    width: 100%;
+    min-height: 54px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 2px solid var(--line);
+    background: var(--card);
+    font-size: 1.1rem;
+    font-weight: 700;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field:focus { border-color: var(--primary); }
+  .label { font-size: .82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 8px; }
+  .muted { color: var(--muted); }
+  .row { display: flex; gap: 10px; align-items: center; }
+  .grow { flex: 1; min-width: 0; }
+
+  .bottom {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: 12px 16px calc(var(--safe-b) + 12px);
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    z-index: 20;
+  }
+  .bottom .inner { max-width: 560px; margin: 0 auto; display: grid; gap: 8px; }
+
+  /* ------- inicio ------- */
+  .logo { text-align: center; margin: 18px 0 22px; }
+  .logo h1 { font-size: 3.4rem; letter-spacing: -.02em; }
+  .logo h1 span:nth-child(1) { color: #ff5a36; }
+  .logo h1 span:nth-child(2) { color: #f6a21a; }
+  .logo h1 span:nth-child(3) { color: #1fae6b; }
+  .logo h1 span:nth-child(4) { color: #7b4dff; }
+  .logo .fruits { font-size: 2rem; letter-spacing: .2em; }
+  .logo p { margin: 6px 0 0; color: var(--muted); font-weight: 700; }
+  .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-weight: 800; font-size: .85rem; margin: 16px 0; }
+  .or::before, .or::after { content: ''; flex: 1; height: 2px; background: var(--line); }
+  .code-input { text-transform: uppercase; letter-spacing: .35em; text-align: center; font-family: 'Baloo 2', monospace; font-size: 1.5rem; }
+  .rules summary { font-weight: 800; cursor: pointer; }
+  .rules ol { padding-left: 20px; margin: 10px 0 0; line-height: 1.5; }
+
+  /* ------- sala ------- */
+  .roomhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .code-big { font-family: 'Baloo 2', monospace; font-size: 2.3rem; font-weight: 800; letter-spacing: .18em; color: var(--primary); }
+  .players { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .player { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: var(--bg); }
+  .avatar {
+    width: 38px; height: 38px; flex: none; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 1.05rem;
+  }
+  .player .name { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .player .sub { font-size: .8rem; color: var(--muted); font-weight: 700; }
+  .player.off { opacity: .5; }
+  .pill { font-size: .78rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; background: var(--line); color: var(--muted); white-space: nowrap; }
+  .pill.ok { background: var(--green-bg); color: var(--green); }
+  .kick { width: 32px; height: 32px; border-radius: 50%; color: var(--muted); font-size: 1.1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 99px; font-weight: 800; font-size: .92rem;
+    background: var(--bg); box-shadow: inset 0 0 0 2px var(--line);
+  }
+  .chip.on { background: var(--primary); color: #fff; box-shadow: none; }
+  .chip.add { color: var(--muted); box-shadow: inset 0 0 0 2px dashed var(--line); border: 2px dashed var(--line); background: transparent; }
+  .chip .x { font-size: 1rem; line-height: 1; opacity: .7; }
+
+  /* ------- cuenta regresiva ------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: grid; place-items: center; text-align: center;
+    background: color-mix(in srgb, var(--primary) 92%, black);
+    color: #fff;
+  }
+  .overlay .big { font-family: 'Baloo 2', sans-serif; font-size: 9rem; font-weight: 800; line-height: 1; animation: pop .5s ease-out; }
+  .overlay .msg { font-size: 1.4rem; font-weight: 800; margin-top: 8px; }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ------- juego ------- */
+  .gamehead {
+    position: sticky; top: 0; z-index: 10;
+    margin: calc(-14px - var(--safe-t)) -16px 14px;
+    padding: calc(var(--safe-t) + 10px) 16px 10px;
+    background: var(--bg);
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 2px solid var(--line);
+  }
+  .letter {
+    width: 64px; height: 64px; flex: none;
+    border-radius: 18px;
+    background: var(--primary); color: #fff;
+    display: grid; place-items: center;
+    font-family: 'Baloo 2', sans-serif; font-size: 2.6rem; font-weight: 800;
+    box-shadow: 0 4px 0 rgba(0,0,0,.18);
+  }
+  .timer { font-family: 'Baloo 2', sans-serif; font-size: 1.8rem; font-weight: 800; }
+  .timer.hurry { color: var(--red); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.08); } }
+  .progress { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 4px; }
+  .progress > div { height: 100%; background: var(--green); transition: width .25s; }
+  .answers { display: grid; gap: 10px; }
+  .answer label { display: block; font-weight: 800; font-size: .9rem; margin: 0 0 6px 4px; color: var(--muted); }
+  .answer .wrap { position: relative; }
+  .answer .field { padding-right: 46px; }
+  .answer .mark { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; }
+  .answer.good .field { border-color: var(--green); }
+  .answer.bad .field { border-color: var(--amber); }
+  .btn.basta { background: var(--red); font-size: 1.35rem; font-family: 'Baloo 2', sans-serif; letter-spacing: .04em; min-height: 60px; }
+
+  /* ------- votacion ------- */
+  .vote-cat h3 { font-size: 1.25rem; margin-bottom: 10px; }
+  .entries { display: grid; gap: 8px; }
+  .entry {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; text-align: left;
+    padding: 10px 12px; border-radius: 14px;
+    background: var(--bg);
+    box-shadow: inset 0 0 0 2px transparent;
+    transition: background .15s, box-shadow .15s;
+  }
+  .entry .who { font-size: .78rem; font-weight: 800; color: var(--muted); }
+  .entry .val { font-weight: 800; font-size: 1.05rem; word-break: break-word; }
+  .entry .val.empty { color: var(--muted); font-style: italic; font-weight: 600; }
+  .entry.mine { background: transparent; box-shadow: inset 0 0 0 2px var(--line); }
+  .entry.invalid .val { text-decoration: line-through; color: var(--muted); }
+  .entry.rejected { background: var(--red-bg); }
+  .entry.rejected .val { color: var(--red); text-decoration: line-through; }
+  .entry.byme { box-shadow: inset 0 0 0 2px var(--red); }
+  .entry .votes { font-size: .8rem; font-weight: 800; color: var(--red); white-space: nowrap; }
+  .entry .tap { font-size: 1.3rem; opacity: .6; }
+  .hint { background: var(--amber-bg); color: var(--ink); padding: 12px 14px; border-radius: 14px; font-weight: 700; font-size: .92rem; margin-bottom: 14px; }
+
+  /* ------- resultados ------- */
+  .rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .rank li { border-radius: 14px; background: var(--bg); overflow: hidden; }
+  .rank .top { display: flex; align-items: center; gap: 10px; padding: 12px; width: 100%; text-align: left; }
+  .rank .pos { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.4rem; width: 32px; text-align: center; }
+  .rank .tot { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.5rem; }
+  .rank .plus { font-weight: 800; color: var(--green); font-size: .9rem; }
+  .rank .me { box-shadow: inset 0 0 0 2px var(--primary); }
+  .detail { padding: 0 12px 12px; display: grid; gap: 4px; }
+  .detail div { display: flex; justify-content: space-between; gap: 10px; font-size: .92rem; padding: 6px 10px; border-radius: 10px; background: var(--card); }
+  .detail .c { color: var(--muted); font-weight: 700; flex: none; }
+  .detail .v { font-weight: 800; text-align: right; overflow: hidden; text-overflow: ellipsis; }
+  .detail .p { font-weight: 800; width: 44px; text-align: right; flex: none; }
+  .p.unica { color: var(--green); } .p.repetida { color: var(--amber); } .p.cero { color: var(--red); }
+
+  /* ------- avisos ------- */
+  .toasts { position: fixed; left: 0; right: 0; top: calc(var(--safe-t) + 10px); z-index: 60; display: grid; justify-items: center; gap: 6px; pointer-events: none; padding: 0 16px; }
+  .toast { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 99px; font-weight: 800; font-size: .92rem; box-shadow: var(--shadow); animation: slide .25s ease-out; max-width: 100%; text-align: center; }
+  @keyframes slide { from { transform: translateY(-20px); opacity: 0; } }
+  .offline { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; background: var(--red); color: #fff; text-align: center; font-weight: 800; padding: 8px 16px calc(var(--safe-b) + 8px); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= INICIO ================= -->
+  <section id="vInicio">
+    <div class="logo">
+      <div class="fruits">🍓🍋🍏🍇</div>
+      <h1><span>Tu</span><span>ti</span><span>fru</span><span>ti</span></h1>
+      <p>Basta, Stop o Tutifruti: juega con amigos desde el celular</p>
+    </div>
+
+    <div class="card">
+      <p class="label">Tu nombre</p>
+      <input id="inNombre" class="field" maxlength="18" autocomplete="nickname" placeholder="Ej: Sofi" enterkeyhint="done">
+    </div>
+
+    <div class="card">
+      <button id="btCrear" class="btn">✨ Crear sala nueva</button>
+      <div class="or">o únete con un código</div>
+      <div class="row">
+        <input id="inCodigo" class="field code-input grow" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD" enterkeyhint="go">
+        <button id="btUnirse" class="btn sec" style="width:auto">Entrar</button>
+      </div>
+    </div>
+
+    <details class="card rules">
+      <summary>📖 ¿Cómo se juega?</summary>
+      <ol>
+        <li>Crea una sala y comparte el código o el enlace.</li>
+        <li>Cuando todos marcan <b>Listo</b>, sale una letra al azar.</li>
+        <li>Escribe una palabra con esa letra para cada categoría.</li>
+        <li>El primero en completar todo canta <b>¡Basta!</b> y la ronda se cierra para todos.</li>
+        <li>Revisan las respuestas de los demás y rechazan las que no valen. Si más de la mitad la rechaza, vale 0.</li>
+        <li><b>100</b> puntos si nadie más la puso, <b>50</b> si se repite, <b>0</b> si está vacía, no empieza con la letra o fue rechazada.</li>
+      </ol>
+    </details>
+  </section>
+
+  <!-- ================= SALA ================= -->
+  <section id="vSala" hidden>
+    <div class="roomhead">
+      <div>
+        <p class="label" style="margin:0">Código de sala</p>
+        <button id="btCopiar" class="code-big" title="Copiar código"></button>
+      </div>
+      <button id="btCompartir" class="btn small">📤 Invitar</button>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:10px">
+        <p class="label" style="margin:0">Jugadores</p>
+        <span id="txListos" class="pill"></span>
+      </div>
+      <ul id="lsJugadores" class="players"></ul>
+    </div>
+
+    <div class="card">
+      <p class="label">Tiempo por ronda</p>
+      <div id="chTiempo" class="chips"></div>
+      <p class="label" style="margin-top:16px">Categorías <span id="txNumCats"></span></p>
+      <div id="chCats" class="chips"></div>
+      <div id="bxAgregar" class="row" style="margin-top:10px" hidden>
+        <input id="inCat" class="field grow" maxlength="24" placeholder="Nueva categoría" enterkeyhint="done" list="dlSug">
+        <datalist id="dlSug"></datalist>
+        <button id="btAgregar" class="btn small">＋</button>
+      </div>
+      <p id="txSoloAnfi" class="muted" style="font-size:.85rem;margin:10px 0 0">Solo el anfitrión 👑 puede cambiar la configuración.</p>
+    </div>
+
+    <button id="btSalir" class="btn sec">🚪 Salir de la sala</button>
+  </section>
+
+  <!-- ================= JUEGO ================= -->
+  <section id="vJuego" hidden>
+    <div class="gamehead">
+      <div id="txLetra" class="letter"></div>
+      <div class="grow">
+        <div class="row" style="justify-content:space-between">
+          <span class="muted" style="font-weight:800">Ronda <span id="txRonda"></span></span>
+          <span id="txTimer" class="timer"></span>
+        </div>
+        <div class="progress"><div id="pgLlenas"></div></div>
+      </div>
+    </div>
+    <div id="lsRespuestas" class="answers"></div>
+  </section>
+
+  <!-- ================= VOTACION ================= -->
+  <section id="vVotacion" hidden>
+    <div class="row" style="margin-bottom:12px">
+      <div id="txLetraV" class="letter"></div>
+      <div class="grow">
+        <h2>Revisión</h2>
+        <div class="muted" style="font-weight:700">Cerró: <span id="txCerro"></span></div>
+      </div>
+    </div>
+    <div class="hint">👆 Toca una respuesta de otro jugador para rechazarla. Las tachadas no empiezan con la letra y valen 0.</div>
+    <div id="lsVotacion"></div>
+  </section>
+
+  <!-- ================= RESULTADOS ================= -->
+  <section id="vResultados" hidden>
+    <div class="row" style="margin-bottom:12px">
+      <div id="txLetraR" class="letter"></div>
+      <div class="grow">
+        <h2>Resultados</h2>
+        <div class="muted" style="font-weight:700">Ronda <span id="txRondaR"></span> · toca un jugador para ver el detalle</div>
+      </div>
+    </div>
+    <div class="card">
+      <ol id="lsRanking" class="rank"></ol>
+    </div>
+    <button id="btReiniciar" class="btn sec" hidden>🔄 Reiniciar puntajes</button>
+  </section>
+
+</div>
+
+<!-- barra inferior fija -->
+<div id="barra" class="bottom" hidden><div class="inner">
+  <button id="btPrincipal" class="btn"></button>
+  <button id="btForzar" class="btn sec" hidden></button>
+</div></div>
+
+<div id="ovCuenta" class="overlay" hidden><div><div id="txCuenta" class="big">3</div><div id="txCuentaMsg" class="msg">¡Prepárate!</div></div></div>
+
+<div id="toasts" class="toasts"></div>
+<div id="bnOffline" class="offline" hidden>Reconectando…</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const norm = s => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const COLORES = ['#ff5a36', '#f6a21a', '#1fae6b', '#7b4dff', '#0fa3b1', '#e2457a', '#4a7bff', '#8a5a44', '#2bb5a0', '#c94dd6', '#ff8a00', '#5c6bc0'];
+  const colorDe = id => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORES[h % COLORES.length]; };
+  const avatar = j => `<span class="avatar" style="background:${colorDe(j.id)}">${esc((j.nombre || '?')[0].toUpperCase())}</span>`;
+
+  // Almacenamiento tolerante a fallos (modo privado, etc.)
+  const store = (area => ({
+    get: k => { try { return area().getItem(k); } catch { return null; } },
+    set: (k, v) => { try { area().setItem(k, v); } catch {} },
+    del: k => { try { area().removeItem(k); } catch {} }
+  }));
+  const local = store(() => localStorage);
+  const sesion = store(() => sessionStorage);
+
+  // Token propio de cada pestaña: permite recuperar el lugar al reconectar.
+  let token = sesion.get('tf_token');
+  if (!token) {
+    token = (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36)).replace(/[^a-zA-Z0-9_-]/g, '');
+    sesion.set('tf_token', token);
+  }
+
+  const socket = io({ reconnectionDelayMax: 3000 });
+
+  let yo = null;              // mi id
+  let est = null;             // ultimo snapshot del servidor
+  let desfase = 0;            // reloj servidor - reloj local
+  let votacion = null;
+  let resultados = null;
+  let rondaArmada = null;     // ronda para la que se construyeron los inputs
+  let abiertos = new Set();   // detalle expandido en resultados
+
+  // ---------------- avisos ----------------
+  function toast(txt) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = txt;
+    $('toasts').appendChild(t);
+    setTimeout(() => t.remove(), 2600);
+  }
+  const vibrar = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+
+  // ---------------- inicio ----------------
+  $('inNombre').value = local.get('tf_nombre') || '';
+  const codigoUrl = new URLSearchParams(location.search).get('sala');
+  if (codigoUrl) $('inCodigo').value = codigoUrl.toUpperCase().slice(0, 4);
+
+  function nombreValido() {
+    const n = $('inNombre').value.trim();
+    if (!n) { toast('Escribe tu nombre primero'); $('inNombre').focus(); return null; }
+    local.set('tf_nombre', n);
+    return n;
+  }
+  $('btCrear').onclick = () => {
+    const nombre = nombreValido(); if (!nombre) return;
+    socket.emit('crearSala', { nombre, token });
+  };
+  function unirse() {
+    const nombre = nombreValido(); if (!nombre) return;
+    const codigo = $('inCodigo').value.trim().toUpperCase();
+    if (codigo.length !== 4) { toast('El código tiene 4 letras'); $('inCodigo').focus(); return; }
+    socket.emit('unirse', { nombre, token, codigo });
+  }
+  $('btUnirse').onclick = unirse;
+  $('inCodigo').addEventListener('keydown', e => { if (e.key === 'Enter') unirse(); });
+  $('inCodigo').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, ''); });
+
+  // ---------------- conexion ----------------
+  socket.on('connect', () => {
+    $('bnOffline').hidden = true;
+    // Si esta pestaña ya estaba en una sala, vuelve a entrar sola.
+    const codigo = sesion.get('tf_sala');
+    const nombre = local.get('tf_nombre');
+    if (codigo && nombre) { reintento = true; socket.emit('unirse', { nombre, token, codigo }); }
+  });
+  let reintento = false;
+  socket.on('disconnect', () => { if (est) $('bnOffline').hidden = false; });
+
+  socket.on('entrada', d => {
+    yo = d.id;
+    reintento = false;
+    sesion.set('tf_sala', d.codigo);
+    history.replaceState(null, '', '?sala=' + d.codigo);
+  });
+  socket.on('errorSala', msg => {
+    toast(msg);
+    // La sala ya no existe (p. ej. el servidor se reinició): volver al inicio.
+    if (reintento) { reintento = false; salirLocal(); }
+  });
+  socket.on('expulsado', () => { salirLocal(); toast('El anfitrión te sacó de la sala'); });
+  socket.on('aviso', toast);
+
+  socket.on('estado', s => {
+    const faseAnterior = est && est.fase;
+    est = s;
+    desfase = s.ahora - Date.now();
+    if (s.fase !== 'votacion') votacion = null;
+    if (s.fase !== 'resultados') resultados = null;
+    if (s.fase === 'cuenta' && faseAnterior !== 'cuenta') cuentaRegresiva();
+    if (s.fase === 'juego' && faseAnterior !== 'juego') vibrar(80);
+    render();
+  });
+  socket.on('misRespuestas', r => {
+    if (!est || est.fase !== 'juego') return;
+    armarJuego();
+    const ins = $('lsRespuestas').querySelectorAll('input');
+    ins.forEach((inp, i) => { if (!inp.value && r[i]) inp.value = r[i]; });
+    actualizarJuego();
+  });
+  socket.on('basta', d => {
+    enviarRespuestas();
+    vibrar([120, 60, 120]);
+    mostrarOverlay('✋', '¡Basta! — ' + d.por);
+    setTimeout(() => { $('ovCuenta').hidden = true; }, 1500);
+  });
+  socket.on('votacion', v => { votacion = v; render(); });
+  socket.on('voto', d => {
+    if (!votacion) return;
+    const fila = votacion.filas[d.idx];
+    const e = fila && fila.entradas.find(x => x.jugadorId === d.jugadorId);
+    if (e) { e.rechazos = d.rechazos; renderVotacion(); }
+  });
+  socket.on('resultados', r => { resultados = r; abiertos = new Set([yo]); render(); });
+
+  // ---------------- render general ----------------
+  const vistas = { inicio: 'vInicio', sala: 'vSala', cuenta: 'vSala', juego: 'vJuego', votacion: 'vVotacion', resultados: 'vResultados' };
+
+  function render() {
+    const fase = est ? est.fase : 'inicio';
+    for (const [f, id] of Object.entries(vistas)) $(id).hidden = vistas[fase] !== id;
+    $('barra').hidden = !est;
+    if (!est) return;
+    if (fase === 'sala' || fase === 'cuenta') renderSala();
+    if (fase === 'juego') renderJuego();
+    if (fase === 'votacion') renderVotacion();
+    if (fase === 'resultados') renderResultados();
+    renderBarra();
+  }
+
+  const soyAnfitrion = () => est && est.anfitrion === yo;
+  const conectados = () => est.jugadores.filter(j => j.conectado);
+  const yoJugador = () => est.jugadores.find(j => j.id === yo);
+
+  function renderBarra() {
+    const p = $('btPrincipal'), f = $('btForzar');
+    const c = conectados(), listos = c.filter(j => j.listo).length;
+    const meListo = yoJugador() && yoJugador().listo;
+    p.className = 'btn'; p.disabled = false; f.hidden = true;
+
+    if (est.fase === 'sala' || est.fase === 'resultados' || est.fase === 'cuenta') {
+      const txt = est.fase === 'resultados' ? 'Siguiente ronda' : '¡Estoy listo!';
+      p.textContent = meListo ? `✅ Listo — esperando (${listos}/${c.length})` : `${txt} (${listos}/${c.length})`;
+      if (meListo) p.className = 'btn ok';
+      p.disabled = est.fase === 'cuenta';
+      p.onclick = () => socket.emit('listo');
+      if (soyAnfitrion() && c.length > 1 && listos < c.length && est.fase !== 'cuenta') {
+        f.hidden = false; f.textContent = '▶ Empezar sin esperar';
+        f.onclick = () => socket.emit('forzar');
+      }
+    } else if (est.fase === 'juego') {
+      p.className = 'btn basta';
+      p.textContent = '✋ ¡BASTA!';
+      p.disabled = !todoLleno();
+      p.onclick = () => socket.emit('basta', leerRespuestas());
+    } else if (est.fase === 'votacion') {
+      p.textContent = meListo ? `✅ Revisado — esperando (${listos}/${c.length})` : `Terminé de revisar (${listos}/${c.length})`;
+      if (meListo) p.className = 'btn ok';
+      p.disabled = !votacion;
+      p.onclick = () => socket.emit('listo');
+      if (soyAnfitrion() && c.length > 1 && listos < c.length && votacion) {
+        f.hidden = false; f.textContent = '🏁 Ver resultados ya';
+        f.onclick = () => socket.emit('forzar');
+      }
+    }
+  }
+
+  // ---------------- sala ----------------
+  function renderSala() {
+    $('btCopiar').textContent = est.codigo;
+    const c = conectados();
+    $('txListos').textContent = `${c.filter(j => j.listo).length}/${c.length} listos`;
+
+    $('lsJugadores').innerHTML = est.jugadores.map(j => `
+      <li class="player ${j.conectado ? '' : 'off'}">
+        ${avatar(j)}
+        <div class="grow">
+          <div class="name">${esc(j.nombre)}${j.id === est.anfitrion ? ' 👑' : ''}${j.id === yo ? ' <span class="muted">(tú)</span>' : ''}</div>
+          <div class="sub">${j.conectado ? j.puntaje + ' pts' : 'desconectado…'}</div>
+        </div>
+        <span class="pill ${j.listo ? 'ok' : ''}">${j.listo ? '✓ Listo' : 'Esperando'}</span>
+        ${soyAnfitrion() && j.id !== yo ? `<button class="kick" data-kick="${esc(j.id)}" title="Sacar">✕</button>` : ''}
+      </li>`).join('');
+
+    const anfi = soyAnfitrion();
+    $('chTiempo').innerHTML = est.tiempos.map(t => `
+      <button class="chip ${t === est.tiempo ? 'on' : ''}" data-t="${t}" ${anfi ? '' : 'disabled'}>${t ? (t >= 60 && t % 60 === 0 ? t / 60 + ' min' : t + ' s') : 'Sin límite'}</button>`).join('');
+
+    $('txNumCats').textContent = `(${est.categorias.length})`;
+    $('chCats').innerHTML = est.categorias.map((cat, i) => `
+      <span class="chip">${esc(cat)}${anfi && est.categorias.length > 3 ? `<button class="x" data-del="${i}" aria-label="Quitar">✕</button>` : ''}</span>`).join('');
+    $('bxAgregar').hidden = !anfi || est.categorias.length >= 12;
+    $('txSoloAnfi').hidden = anfi;
+    const usadas = new Set(est.categorias.map(c => c.toLowerCase()));
+    $('dlSug').innerHTML = est.sugerencias.filter(s => !usadas.has(s.toLowerCase())).map(s => `<option value="${esc(s)}">`).join('');
+  }
+
+  $('lsJugadores').onclick = e => {
+    const b = e.target.closest('[data-kick]');
+    if (b) socket.emit('expulsar', b.dataset.kick);
+  };
+  $('chTiempo').onclick = e => {
+    const b = e.target.closest('[data-t]');
+    if (b && soyAnfitrion()) socket.emit('configurar', { tiempo: Number(b.dataset.t) });
+  };
+  $('chCats').onclick = e => {
+    const b = e.target.closest('[data-del]');
+    if (!b || !soyAnfitrion()) return;
+    const cats = est.categorias.slice(); cats.splice(Number(b.dataset.del), 1);
+    socket.emit('configurar', { categorias: cats });
+  };
+  function agregarCat() {
+    const v = $('inCat').value.trim();
+    if (!v) return;
+    if (est.categorias.some(c => c.toLowerCase() === v.toLowerCase())) { toast('Esa categoría ya está'); return; }
+    socket.emit('configurar', { categorias: [...est.categorias, v] });
+    $('inCat').value = '';
+  }
+  $('btAgregar').onclick = agregarCat;
+  $('inCat').addEventListener('keydown', e => { if (e.key === 'Enter') agregarCat(); });
+
+  function enlace() { return location.origin + location.pathname + '?sala=' + est.codigo; }
+  $('btCopiar').onclick = async () => {
+    try { await navigator.clipboard.writeText(enlace()); toast('Enlace copiado 📋'); } catch { toast('Código: ' + est.codigo); }
+  };
+  $('btCompartir').onclick = async () => {
+    const data = { title: 'Tutifruti', text: `¡Juguemos Tutifruti! Sala ${est.codigo}`, url: enlace() };
+    if (navigator.share) { try { await navigator.share(data); } catch {} }
+    else { try { await navigator.clipboard.writeText(enlace()); toast('Enlace copiado 📋'); } catch { toast('Código: ' + est.codigo); } }
+  };
+
+  function salirLocal() {
+    sesion.del('tf_sala');
+    est = null; yo = null; votacion = null; resultados = null; rondaArmada = null;
+    history.replaceState(null, '', location.pathname);
+    $('inCodigo').value = '';
+    render();
+  }
+  $('btSalir').onclick = () => { socket.emit('salir'); salirLocal(); };
+
+  // ---------------- cuenta regresiva ----------------
+  function mostrarOverlay(big, msg) {
+    $('txCuenta').textContent = big;
+    $('txCuentaMsg').textContent = msg;
+    $('txCuenta').style.animation = 'none'; void $('txCuenta').offsetWidth; $('txCuenta').style.animation = '';
+    $('ovCuenta').hidden = false;
+  }
+  function cuentaRegresiva() {
+    let n = 3;
+    mostrarOverlay(n, '¡Prepárate!');
+    const inicio = Date.now();
+    const iv = setInterval(() => {
+      if (!est || (est.fase !== 'cuenta' && est.fase !== 'juego')) { clearInterval(iv); $('ovCuenta').hidden = true; return; }
+      // la letra llega con el estado de "juego"
+      if (est.fase === 'juego') {
+        clearInterval(iv);
+        mostrarOverlay(est.letra, '¡A escribir!');
+        setTimeout(() => { $('ovCuenta').hidden = true; const f = $('lsRespuestas').querySelector('input'); f && f.focus(); }, 900);
+        return;
+      }
+      const k = Math.max(1, 3 - Math.floor((Date.now() - inicio) / 1000));
+      if (k !== n) { n = k; mostrarOverlay(n, '¡Prepárate!'); vibrar(30); }
+    }, 50);
+  }
+
+  // ---------------- juego ----------------
+  const claveBorrador = () => `tf_r_${est.codigo}_${est.ronda}`;
+
+  function armarJuego() {
+    if (rondaArmada === est.codigo + est.ronda) return;
+    rondaArmada = est.codigo + est.ronda;
+    let borrador = [];
+    try { borrador = JSON.parse(sesion.get(claveBorrador()) || '[]'); } catch {}
+    $('lsRespuestas').innerHTML = est.categoriasRonda.map((cat, i) => `
+      <div class="answer" data-i="${i}">
+        <label for="r${i}">${esc(cat)}</label>
+        <div class="wrap">
+          <input id="r${i}" class="field" maxlength="40" autocomplete="off" autocorrect="off" spellcheck="false"
+                 enterkeyhint="${i === est.categoriasRonda.length - 1 ? 'done' : 'next'}" value="${esc(borrador[i] || '')}">
+          <span class="mark"></span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderJuego() {
+    armarJuego();
+    $('txLetra').textContent = est.letra;
+    $('txRonda').textContent = est.ronda;
+    actualizarJuego();
+    tick();
+  }
+
+  const leerRespuestas = () => [...$('lsRespuestas').querySelectorAll('input')].map(i => i.value.trim());
+  const todoLleno = () => est && est.fase === 'juego' && leerRespuestas().every(v => v);
+
+  function actualizarJuego() {
+    if (!est || !est.letra) return;
+    const L = est.letra.toLowerCase();
+    const r = leerRespuestas();
+    $('lsRespuestas').querySelectorAll('.answer').forEach((el, i) => {
+      const v = norm(r[i]);
+      el.classList.toggle('good', !!v && v.startsWith(L));
+      el.classList.toggle('bad', !!v && !v.startsWith(L));
+      el.querySelector('.mark').textContent = !v ? '' : v.startsWith(L) ? '✅' : '⚠️';
+    });
+    $('pgLlenas').style.width = (r.filter(Boolean).length / r.length * 100) + '%';
+    if (est.fase === 'juego') $('btPrincipal').disabled = !todoLleno();
+  }
+
+  let tEnvio = null;
+  function enviarRespuestas() {
+    clearTimeout(tEnvio);
+    if (!est) return;
+    const r = leerRespuestas();
+    if (r.length) { socket.emit('respuestas', r); sesion.set(claveBorrador(), JSON.stringify(r)); }
+  }
+  $('lsRespuestas').addEventListener('input', () => {
+    actualizarJuego();
+    clearTimeout(tEnvio);
+    tEnvio = setTimeout(enviarRespuestas, 400);
+  });
+  $('lsRespuestas').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    const ins = [...$('lsRespuestas').querySelectorAll('input')];
+    const i = ins.indexOf(e.target);
+    const sig = ins.slice(i + 1).find(x => !x.value.trim()) || ins.find(x => !x.value.trim());
+    if (sig) sig.focus(); else e.target.blur();
+  });
+  // Al bloquear el celular o cambiar de app se manda lo escrito.
+  document.addEventListener('visibilitychange', () => { if (document.hidden && est && est.fase === 'juego') enviarRespuestas(); });
+
+  function tick() {
+    const el = $('txTimer');
+    if (!est || est.fase !== 'juego' || !est.terminaEn) { el.textContent = est && est.fase === 'juego' ? '∞' : ''; el.className = 'timer'; return; }
+    const resta = Math.max(0, Math.ceil((est.terminaEn - (Date.now() + desfase)) / 1000));
+    el.textContent = Math.floor(resta / 60) + ':' + String(resta % 60).padStart(2, '0');
+    el.className = 'timer' + (resta <= 10 ? ' hurry' : '');
+  }
+  setInterval(tick, 250);
+
+  // ---------------- votacion ----------------
+  function renderVotacion() {
+    $('txLetraV').textContent = est.letra;
+    $('txCerro').textContent = est.cerradoPor || '';
+    if (!votacion) { $('lsVotacion').innerHTML = '<div class="card muted" style="text-align:center">Juntando respuestas…</div>'; return; }
+    const otros = Math.max(est.jugadores.length - 1, 1);
+    $('lsVotacion').innerHTML = votacion.filas.map(f => `
+      <div class="card vote-cat">
+        <h3>${esc(f.categoria)}</h3>
+        <div class="entries">
+          ${f.entradas.map(e => {
+            const mia = e.jugadorId === yo;
+            const rech = e.rechazos.length > otros / 2;
+            const porMi = e.rechazos.includes(yo);
+            const cls = ['entry', mia && 'mine', !e.valida && 'invalid', e.valida && rech && 'rejected', porMi && 'byme'].filter(Boolean).join(' ');
+            const votable = !mia && e.valida;
+            return `<button class="${cls}" ${votable ? `data-j="${esc(e.jugadorId)}" data-i="${f.idx}"` : 'disabled'}>
+              <div class="grow">
+                <div class="who">${esc(e.nombre)}${mia ? ' (tú)' : ''}</div>
+                <div class="val ${e.valor ? '' : 'empty'}">${e.valor ? esc(e.valor) : 'sin respuesta'}</div>
+              </div>
+              ${e.rechazos.length ? `<span class="votes">👎 ${e.rechazos.length}</span>` : ''}
+              ${votable ? `<span class="tap">${porMi ? '↩️' : '👎'}</span>` : ''}
+            </button>`;
+          }).join('')}
+        </div>
+      </div>`).join('');
+  }
+  $('lsVotacion').onclick = e => {
+    const b = e.target.closest('[data-j]');
+    if (!b || !votacion) return;
+    const idx = Number(b.dataset.i);
+    const ent = votacion.filas[idx].entradas.find(x => x.jugadorId === b.dataset.j);
+    socket.emit('votar', { jugadorId: b.dataset.j, idx, rechaza: !ent.rechazos.includes(yo) });
+    vibrar(15);
+  };
+
+  // ---------------- resultados ----------------
+  function renderResultados() {
+    $('btReiniciar').hidden = !soyAnfitrion();
+    if (!resultados) { $('lsRanking').innerHTML = ''; return; }
+    $('txLetraR').textContent = resultados.letra;
+    $('txRondaR').textContent = resultados.ronda;
+    const medallas = ['🥇', '🥈', '🥉'];
+    $('lsRanking').innerHTML = resultados.filas.map((f, i) => `
+      <li class="${f.jugadorId === yo ? 'me' : ''}">
+        <button class="top" data-p="${esc(f.jugadorId)}">
+          <span class="pos">${medallas[i] || i + 1}</span>
+          ${avatar({ id: f.jugadorId, nombre: f.nombre })}
+          <span class="grow" style="font-weight:800">${esc(f.nombre)}</span>
+          <span class="plus">+${f.total}</span>
+          <span class="tot">${f.acumulado}</span>
+        </button>
+        ${abiertos.has(f.jugadorId) ? `<div class="detail">${f.campos.map((c, k) => `
+          <div><span class="c">${esc(resultados.categorias[k])}</span><span class="v">${c.valor ? esc(c.valor) : '—'}</span>
+          <span class="p ${c.puntos === 100 ? 'unica' : c.puntos === 50 ? 'repetida' : 'cero'}">${c.puntos}</span></div>`).join('')}
+        </div>` : ''}
+      </li>`).join('');
+  }
+  $('lsRanking').onclick = e => {
+    const b = e.target.closest('[data-p]');
+    if (!b) return;
+    const id = b.dataset.p;
+    abiertos.has(id) ? abiertos.delete(id) : abiertos.add(id);
+    renderResultados();
+  };
+  let confirmarReinicio = 0;
+  $('btReiniciar').onclick = () => {
+    if (Date.now() - confirmarReinicio < 3000) { socket.emit('reiniciar'); confirmarReinicio = 0; $('btReiniciar').textContent = '🔄 Reiniciar puntajes'; return; }
+    confirmarReinicio = Date.now();
+    $('btReiniciar').textContent = '⚠️ Toca de nuevo para confirmar';
+    setTimeout(() => { $('btReiniciar').textContent = '🔄 Reiniciar puntajes'; }, 3000);
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
